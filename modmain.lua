@@ -10,12 +10,10 @@ if type(KEY_OPENCALENDAR) == "string" then KEY_OPENCALENDAR = KEY_OPENCALENDAR:l
 Assets = {
 		Asset("ATLAS", "images/Dragonfly.xml"),
 		Asset("ATLAS", "images/Bee Queen.xml"),
-		--Asset("ATLAS", "images/Klaus.xml"),
 		Asset("ATLAS", "images/Mac Tusk.xml"),
 		Asset("ATLAS", "images/Toadstool.xml"),
 		Asset("ATLAS", "images/Malbatross.xml"),
 		Asset("ATLAS", "images/Fuelweaver.xml"),
-		Asset("ATLAS", "images/PlaceHolder.xml"),
 }
 
 local function findPrefabs(prefab)
