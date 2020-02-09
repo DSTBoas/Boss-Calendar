@@ -8,13 +8,13 @@ local StatusAnnouncer = require("announcer")()
 
 local DataContainer = PersistentData("BossCalendar")
 local SavedTrackersTab = {}
-local npcs = {"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", "Fuelweaver","MacTusk","MacTusk 2","MacTusk 3","MacTusk 4"}
+local npcs = {"Dragonfly", "Bee Queen", "Mac Tusk", "Toadstool", "Malbatross", "Fuelweaver"}
 local announce_message = "BossCalendar!"
 local TheWorld
 local Seed
 
 local RespawnDurations = {
-    ["MacTusk"] = TUNING.WALRUS_REGEN_PERIOD,
+    ["Mac Tusk"] = TUNING.WALRUS_REGEN_PERIOD,
     ["Malbatross"] = 7200,
 }
 
@@ -98,14 +98,28 @@ function BossCalendar:Update()
 	end
 end
 
-local function prep(s)
-    return s:gsub("%s%d" , "")
+local translate =
+{
+    ["beequeen"] = "Bee Queen",
+    ["walrus"] = "Mac Tusk",
+}
+
+function BossCalendar:KilledNpc(npc)
+    if translate[npc] then
+        self:KilledMonster(translate[npc])
+        return
+    end
+    for k, v in pairs(npcs) do
+        if (v:lower() == npc) then
+            self:KilledMonster(v)
+            break
+        end
+    end
 end
 
 function BossCalendar:KilledMonster(npc)
-    --print("Player killed " .. npc ..".")
     if self.trackers and not self.trackers[npc] then
-        local respawnDuration = RespawnDurations[prep(npc)] or 9600
+        local respawnDuration = RespawnDurations[npc] or 9600
         local respawnServerTime = GetServerTime() + respawnDuration
         self.trackers[npc] = respawnServerTime
         _G.ThePlayer.components.timer:StartTimer(npc, respawnDuration)
@@ -165,13 +179,14 @@ function BossCalendar:Open()
 
     for i, npc in pairs(npcs) do
 		if self[npc] then self[npc]:Kill() end
-		self[npc] = self.root:AddChild(Text(UIFONT, 25))
+		self[npc] = self.root:AddChild(Text(NEWFONT, 25))
 		self[npc]:SetPosition(-300 + ((i-1) % 6 * 120), 140 + (math.floor(i / 7) * -120))
 		self[npc]:SetString(npc)
 		local imgName = npc.."img"
 		if self[imgName] then self[imgName]:Kill() end
-		self[imgName] = self.root:AddChild(Image("images/"..prep(npc)..".xml", prep(npc)..".tex"))
+		self[imgName] = self.root:AddChild(Image("images/"..npc..".xml", npc..".tex"))
 		self[imgName]:SetPosition(-300 + ((i-1) % 6 * 120), 95 + (math.floor(i / 7) * -120))
+
 		self[imgName].OnMouseButton = function(button, down, ...) 
             if _G.TheInput:IsControlPressed(_G.CONTROL_FORCE_INSPECT) then
                 self:Image_ClickHandle(npc)
