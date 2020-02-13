@@ -1,8 +1,10 @@
+local OPENKEY = GetModConfigData("OPENKEY")
+local TOGGLEMODE = GetModConfigData("TOGGLEMODE")
 local require = GLOBAL.require
 local BossCalendar = require("screens/bosscalendar")
+local TheWorld, Player
 _G = GLOBAL
-local KEY_OPENCALENDAR = GetModConfigData("OPEN_CALENDAR")
-if type(KEY_OPENCALENDAR) == "string" then KEY_OPENCALENDAR = KEY_OPENCALENDAR:lower():byte() end
+
 Assets = {
 		Asset("ATLAS", "images/Dragonfly.xml"),
 		Asset("ATLAS", "images/Bee Queen.xml"),
@@ -19,71 +21,66 @@ AddClassPostConstruct("widgets/mapwidget", function(self)
 end)
 
 AddSimPostInit(function()
+	TheWorld = GLOBAL.TheWorld
     BossCalendar:LoadCampPositions()
 end)
 
-local function findPrefabs(prefab, area)
-	local x,y,z = GLOBAL.ThePlayer.Transform:GetWorldPosition()
+local function FindNpc(prefab, area)
+	local x,y,z = Player.Transform:GetWorldPosition()
     local ents = TheSim:FindEntities(x,y,z, 20)
 	for _,v in pairs(ents) do
 		if (v.prefab == prefab) then
 			return v
 		end
 	end
-	return nil
+	return
 end
 
-local function countPrefabs(prefab)
-	if not GLOBAL.ThePlayer then return end
-	local x,y,z = GLOBAL.ThePlayer.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z, 20)
-    local c = 0
-	for _,v in pairs(ents) do
-		if (v.prefab == prefab) then
-			c = c + 1
-		end
-	end
-	return c
-end
-
-local function onRemove(inst)
+local function OnRemove(inst)
 	BossCalendar:KilledMonster(inst.name, inst)
 end
 
-local function validateDeath(prefab, bypass)
-	if not GLOBAL.ThePlayer then return end
-	local npc = findPrefabs(prefab)
-	if not npc then return end
-	if bypass then BossCalendar:KilledMonster("Fuelweaver") return end
-	npc:ListenForEvent("onremove", onRemove)
-	GLOBAL.ThePlayer:DoTaskInTime(6, function(inst)
-		if npc then
-			npc:RemoveEventCallback("onremove", onRemove)
+local CanConfirm = {toadstool = true, dragonfly = true, beequeen = true}
+
+local function ValidateDeath(prefab, bypass)
+	if Player then
+		local npc = FindNpc(prefab)
+		if not npc then return end
+		if bypass then BossCalendar:KilledMonster("Fuelweaver") return end
+		if CanConfirm[prefab] and npc.AnimState:IsCurrentAnimation("death") then
+			BossCalendar:KilledMonster(npc.name)
+			return
+		elseif CanConfirm[prefab] then
+			return
 		end
-	end)
+		npc:ListenForEvent("onremove", OnRemove)
+		Player:DoTaskInTime(6, function(inst)
+			if npc then
+				npc:RemoveEventCallback("onremove", OnRemove)
+			end
+		end)
+	end
 end
 
 AddPrefabPostInit("walrus_camp", function(inst)
-	inst:DoTaskInTime(.5, function(inst)
+	inst:DoTaskInTime(.3, function()
 		if inst:IsValid() then
 			BossCalendar:AddCamp(inst, inst:GetPosition())
 		end
 	end)
 end)
-
 AddPrefabPostInit("yellowgem", function(inst)
-	if GLOBAL.TheWorld:HasTag("cave") then return end
-	inst:DoTaskInTime(1/30, function(inst)
-		if countPrefabs("dragon_scales") > 0 then validateDeath("dragonfly") end
-	end)
+	if not TheWorld:HasTag("cave") then
+		ValidateDeath("dragonfly")
+	end
 end)
-AddPrefabPostInit("hivehat", function() validateDeath("beequeen") end)
-AddPrefabPostInit("klaussackkey", function() validateDeath("klaus") end)
-AddPrefabPostInit("blowdart_pipe", function() validateDeath("walrus") end)
-AddPrefabPostInit("shroom_skin", function() if not GLOBAL.TheWorld:HasTag("cave") then return end validateDeath("toadstool") end)
-AddPrefabPostInit("malbatross_beak", function() validateDeath("malbatross") end)
-AddPrefabPostInit("deerclops_eyeball", function() validateDeath("deerclops") end)
-AddPrefabPostInit("skeletonhat", function() if not GLOBAL.TheWorld:HasTag("cave") then return end validateDeath("atrium_gate", true) end)
+AddPrefabPostInit("hivehat", function() ValidateDeath("beequeen") end)
+AddPrefabPostInit("klaussackkey", function() ValidateDeath("klaus") end)
+AddPrefabPostInit("blowdart_pipe", function() ValidateDeath("walrus") end)
+AddPrefabPostInit("shroom_skin", function() if not TheWorld:HasTag("cave") then return end ValidateDeath("toadstool") end)
+AddPrefabPostInit("malbatross_beak", function() ValidateDeath("malbatross") end)
+AddPrefabPostInit("deerclops_eyeball", function() ValidateDeath("deerclops") end)
+AddPrefabPostInit("skeletonhat", function() if not TheWorld:HasTag("cave") then return end ValidateDeath("atrium_gate", true) end)
 
 local function CanToggle()
 	if  TheFrontEnd and 
@@ -94,19 +91,33 @@ local function CanToggle()
 	return
 end
 
-local function ToggleBossCalendar()
-	if CanToggle() then
-		if BossCalendar:Open() then 
-			TheFrontEnd:PushScreen(BossCalendar) 
-		else
-			BossCalendar:Close()
-		end
+local function Display()
+	if CanToggle() and BossCalendar:Open() then 
+		TheFrontEnd:PushScreen(BossCalendar)
+	elseif TOGGLEMODE and CanToggle()  then
+		BossCalendar:Close()
 	end
 end
-GLOBAL.TheInput:AddKeyUpHandler(KEY_OPENCALENDAR, ToggleBossCalendar)
 
-local function Init(inst)
-	if not inst == _G.ThePlayer then return end
-	BossCalendar:Load(inst)
+local function Hide()
+	if CanToggle() then
+		BossCalendar:Close()
+	end
 end
-AddPlayerPostInit(Init)
+
+if OPENKEY then
+	if not TOGGLEMODE then
+		GLOBAL.TheInput:AddKeyUpHandler(OPENKEY, Hide)
+	end
+	GLOBAL.TheInput:AddKeyDownHandler(OPENKEY, Display)
+end
+
+local function ModInit(inst)
+	inst:DoTaskInTime(0, function()
+		if inst == GLOBAL.ThePlayer then
+			Player = GLOBAL.ThePlayer
+			BossCalendar:Load(inst)
+		end
+	end)
+end
+AddPlayerPostInit(ModInit)
