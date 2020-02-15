@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "101.100"
+version = "101.010"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
@@ -24,7 +24,7 @@ local function AddConfig(label, name, options, default, hover)
     return {label = label, name = name, options = options, default = default, hover = hover or ""}
 end
 
-local bool = {{description = "Toggle", data = true, hover = "Toggle: Press to open or close the Boss Calendar" },{description = "Hold", data = false, hover = "Hold: Only holding the key opens the Boss Calendar"}}
+local bool = {{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar" },{description = "Hold", data = false, hover = "Hold: Holding the key opens the Boss Calendar"}}
 local keyslist = {{description = "Disabled", data = false}}
 local string = ""
 for i = 1, 26 do
@@ -35,5 +35,5 @@ end
 configuration_options = 
 {
 	AddConfig("Key to Open", "OPENKEY", keyslist, 118, "Assign a key"),
-	AddConfig("Open Mode", "TOGGLEMODE", bool, true, "Toggle/Hold")
+	AddConfig("Open Mode", "TOGGLEMODE", bool, true, "Toggle / Hold")
 }

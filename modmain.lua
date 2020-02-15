@@ -25,11 +25,11 @@ AddSimPostInit(function()
     BossCalendar:LoadCampPositions()
 end)
 
-local function FindNpc(prefab, area)
+local function FindNpc(prefab)
 	local x,y,z = Player.Transform:GetWorldPosition()
     local ents = TheSim:FindEntities(x,y,z, 20)
 	for _,v in pairs(ents) do
-		if (v.prefab == prefab) then
+		if v.prefab == prefab then
 			return v
 		end
 	end
@@ -46,6 +46,7 @@ local function ValidateDeath(prefab, bypass)
 	if Player then
 		local npc = FindNpc(prefab)
 		if not npc then return end
+		print(npc.name)
 		if bypass then BossCalendar:KilledMonster("Fuelweaver") return end
 		if CanConfirm[prefab] and npc.AnimState:IsCurrentAnimation("death") then
 			BossCalendar:KilledMonster(npc.name)
@@ -54,7 +55,7 @@ local function ValidateDeath(prefab, bypass)
 			return
 		end
 		npc:ListenForEvent("onremove", OnRemove)
-		Player:DoTaskInTime(6, function(inst)
+		Player:DoTaskInTime(10, function(inst)
 			if npc then
 				npc:RemoveEventCallback("onremove", OnRemove)
 			end
@@ -70,17 +71,35 @@ AddPrefabPostInit("walrus_camp", function(inst)
 	end)
 end)
 AddPrefabPostInit("yellowgem", function(inst)
-	if not TheWorld:HasTag("cave") then
+	if TheWorld and not TheWorld:HasTag("cave") then
 		ValidateDeath("dragonfly")
 	end
 end)
-AddPrefabPostInit("hivehat", function() ValidateDeath("beequeen") end)
-AddPrefabPostInit("klaussackkey", function() ValidateDeath("klaus") end)
-AddPrefabPostInit("blowdart_pipe", function() ValidateDeath("walrus") end)
-AddPrefabPostInit("shroom_skin", function() if not TheWorld:HasTag("cave") then return end ValidateDeath("toadstool") end)
-AddPrefabPostInit("malbatross_beak", function() ValidateDeath("malbatross") end)
-AddPrefabPostInit("deerclops_eyeball", function() ValidateDeath("deerclops") end)
-AddPrefabPostInit("skeletonhat", function() if not TheWorld:HasTag("cave") then return end ValidateDeath("atrium_gate", true) end)
+AddPrefabPostInit("hivehat", function()
+	ValidateDeath("beequeen")
+end)
+--[[AddPrefabPostInit("klaussackkey", function()
+	ValidateDeath("klaus") 
+end)]]
+AddPrefabPostInit("blowdart_pipe", function()
+	ValidateDeath("walrus")
+end)
+AddPrefabPostInit("shroom_skin", function() 
+	if TheWorld and TheWorld:HasTag("cave") then 
+		ValidateDeath("toadstool")
+	end
+end)
+AddPrefabPostInit("malbatross_beak", function()
+	ValidateDeath("malbatross")
+end)
+AddPrefabPostInit("deerclops_eyeball", function()
+	ValidateDeath("deerclops")
+end)
+AddPrefabPostInit("skeletonhat", function() 
+	if TheWorld and TheWorld:HasTag("cave") then
+		ValidateDeath("atrium_gate", true)
+	end
+end)
 
 local function CanToggle()
 	if  TheFrontEnd and 
@@ -116,7 +135,7 @@ local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
 		if inst == GLOBAL.ThePlayer then
 			Player = GLOBAL.ThePlayer
-			BossCalendar:Load(inst)
+			BossCalendar:Load(Player)
 		end
 	end)
 end
