@@ -1,24 +1,24 @@
 local OPENKEY = GetModConfigData("OPENKEY")
 local TOGGLEMODE = GetModConfigData("TOGGLEMODE")
+local IGLOICON = GetModConfigData("IGLO_ICON_SIZE")
+local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
+local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 local require = GLOBAL.require
 local BossCalendar = require("screens/bosscalendar")
 local TheWorld, Player
 _G = GLOBAL
 
 Assets = {
-		Asset("ATLAS", "images/Dragonfly.xml"),
-		Asset("ATLAS", "images/Bee Queen.xml"),
-		Asset("ATLAS", "images/MacTusk.xml"),
-		Asset("ATLAS", "images/Toadstool.xml"),
-		Asset("ATLAS", "images/Malbatross.xml"),
-		Asset("ATLAS", "images/Fuelweaver.xml"),
-		Asset("ATLAS", "images/iglo.xml"),
+	Asset("ATLAS", "images/npcs.xml"),
+	Asset("ATLAS", "images/"..IGLOICON..".xml"),
 }
-AddMinimapAtlas("images/iglo.xml")
 
-AddClassPostConstruct("widgets/mapwidget", function(self)
-	BossCalendar:AddMapIcons(self)
-end)
+if MAPICONS_ENABLED then
+	AddMinimapAtlas("images/"..IGLOICON..".xml")
+	AddClassPostConstruct("widgets/mapwidget", function(self)
+		BossCalendar:AddMapIcons(self, IGLOICON)
+	end)
+end
 
 AddSimPostInit(function()
 	TheWorld = GLOBAL.TheWorld
@@ -54,7 +54,7 @@ local function ValidateDeath(prefab, bypass)
 			return
 		end
 		npc:ListenForEvent("onremove", OnRemove)
-		Player:DoTaskInTime(10, function(inst)
+		Player:DoTaskInTime(10, function()
 			if npc then
 				npc:RemoveEventCallback("onremove", OnRemove)
 			end
@@ -65,7 +65,7 @@ end
 AddPrefabPostInit("walrus_camp", function(inst)
 	inst:DoTaskInTime(.3, function()
 		if inst:IsValid() then
-			BossCalendar:AddCamp(inst, inst:GetPosition())
+			BossCalendar:AddCamp(inst, inst:GetPosition(), MAPICONS_ENABLED, IGLO_NUMBERS)
 		end
 	end)
 end)
@@ -77,9 +77,9 @@ end)
 AddPrefabPostInit("hivehat", function()
 	ValidateDeath("beequeen")
 end)
---[[AddPrefabPostInit("klaussackkey", function()
+AddPrefabPostInit("klaussackkey", function()
 	ValidateDeath("klaus") 
-end)]]
+end)
 AddPrefabPostInit("blowdart_pipe", function()
 	ValidateDeath("walrus")
 end)

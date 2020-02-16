@@ -2,7 +2,6 @@ local Screen = require "widgets/screen"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 local Image = require "widgets/image"
-local Menu = require "widgets/menu"
 local PersistentData = require("persistentdata")
 local PersistentMapIcons = require("widgets/persistentmapicons")
 local StatusAnnouncer = require("announcer")()
@@ -12,7 +11,10 @@ local SavedTrackersTab = {}
 local npcs = {"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", "Fuelweaver","MacTusk","MacTusk 2","MacTusk 3","MacTusk 4"}
 local announce_message = "BossCalendar:"
 local Session
---WORLD_SPECIAL_EVENT
+
+if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then --WORLD_SPECIAL_EVENT
+    table.insert(npcs, "Klaus")
+end
 
 local RespawnDurations = {
     ["MacTusk"] = TUNING.WALRUS_REGEN_PERIOD,
@@ -41,10 +43,10 @@ end
 
 local WalrusCamps = {}
 
-function BossCalendar:AddMapIcons(widget)
+function BossCalendar:AddMapIcons(widget, icon)
     widget.campicons = widget:AddChild(PersistentMapIcons(widget, 0.85))
     for i, pos in ipairs(WalrusCamps) do
-        widget.campicons:AddMapIcon("images/iglo.xml", "iglo_".. i ..".tex", pos)
+        widget.campicons:AddMapIcon("images/"..icon..".xml", icon.."_".. i ..".tex", pos)
     end
 end
 
@@ -87,7 +89,7 @@ local function InsertCamp(pos)
     table.insert(WalrusCamps, CeilVector(pos))
 end
 
-function BossCalendar:AddCamp(inst, pos)
+function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
     local campExists = Walrus_CampPositionExists(CeilVector(pos))
     local save = false
     if not campExists then
@@ -95,14 +97,17 @@ function BossCalendar:AddCamp(inst, pos)
         campExists = Walrus_CampPositionExists(CeilVector(pos))
         save = true
     end
-    local label = inst.entity:AddLabel()
-    label:SetFont(_G.CHATFONT_OUTLINE)
-    label:SetFontSize(35)
-    label:SetWorldOffset(0, 2, 0)
-    label:SetText(" " .. campExists .. " ")
-    label:Enable(true)
-    inst.MiniMapEntity:SetIcon("iglo_" .. campExists .. ".tex")
-    inst.tracker_done = true
+    if iglonumbers then
+        local label = inst.entity:AddLabel()
+        label:SetFont(_G.CHATFONT_OUTLINE)
+        label:SetFontSize(35)
+        label:SetWorldOffset(0, 5, 0)
+        label:SetText(" " .. campExists .. " ")
+        label:Enable(true)
+    end
+    if mapicons then
+        inst.MiniMapEntity:SetIcon("iglo_" .. campExists .. ".tex")
+    end
     if save then
         SaveCampPositions()
     end
@@ -264,7 +269,8 @@ function BossCalendar:Open()
 		self[npc]:SetString(npc)
 		local imgName = npc.."img"
 		if self[imgName] then self[imgName]:Kill() end
-		self[imgName] = self.root:AddChild(Image("images/"..Trim(npc)..".xml", Trim(npc)..".tex"))
+		self[imgName] = self.root:AddChild(Image("images/npcs.xml", Trim(npc)..".tex"))
+        self[imgName]:SetSize(68,68)
 		self[imgName]:SetPosition(-255 + ((i-1) % 5 * 120), 95 + (math.floor(i / 6) * -150)) -- -120
 		self[imgName].OnMouseButton = function(button, down, ...) 
             if _G.TheInput:IsControlPressed(_G.CONTROL_FORCE_INSPECT) then

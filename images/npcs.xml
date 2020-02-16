@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="npcs.tex" />
+	<Elements>
+		<Element name="Bee Queen.tex" u1="0.001" u2="0.1943125" v2="0.999" v1="0.610375" variant="" />
+		<Element name="Dragonfly.tex" u1="0.1963125" u2="0.389625" v2="0.999" v1="0.610375" variant="" />
+		<Element name="Fuelweaver.tex" u1="0.001" u2="0.1943125" v2="0.608375" v1="0.21975" variant="" />
+		<Element name="Klaus.tex" u1="0.1963125" u2="0.389625" v2="0.608375" v1="0.21975" variant="" />
+		<Element name="MacTusk.tex" u1="0.391625" u2="0.5849375" v2="0.999" v1="0.610375" variant="" />
+		<Element name="Malbatross.tex" u1="0.391625" u2="0.5849375" v2="0.608375" v1="0.21975" variant="" />
+		<Element name="Toadstool.tex" u1="0.5869375" u2="0.78025" v2="0.999" v1="0.610375" variant="" />
+	</Elements>
+</Atlas>

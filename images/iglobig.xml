@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="iglobig.tex" />
+	<Elements>
+		<Element name="iglobig_1.tex" u1="0.001" u2="0.49509375" v2="0.999" v1="0.50490625" variant="" />
+		<Element name="iglobig_2.tex" u1="0.49709375" u2="0.9911875" v2="0.999" v1="0.50490625" variant="" />
+		<Element name="iglobig_3.tex" u1="0.001" u2="0.49509375" v2="0.50290625" v1="0.0088125" variant="" />
+		<Element name="iglobig_4.tex" u1="0.49709375" u2="0.9911875" v2="0.50290625" v1="0.0088125" variant="" />
+	</Elements>
+</Atlas>

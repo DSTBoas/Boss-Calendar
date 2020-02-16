@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "101.010.010"
+version = "1"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
@@ -24,8 +24,14 @@ local function AddConfig(label, name, options, default, hover)
     return {label = label, name = name, options = options, default = default, hover = hover or ""}
 end
 
+local function AddSectionTitle(title)
+    return AddConfig(title, "", {{description = "", data = 0}}, 0)
+end
+
+local boolnohover = {{description = "Enabled", data = true },{description = "Disabled", data = false}}
 local bool = {{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar" },{description = "Hold", data = false, hover = "Hold: Holding the key opens the Boss Calendar"}}
 local keyslist = {{description = "Disabled", data = false}}
+local icons = {{description = "Pronounced", data = "iglobig"},{description = "Subtle", data = "iglo"}}
 local string = ""
 for i = 1, 26 do
 	local ch = string.format("%c", (64 + i))
@@ -34,6 +40,11 @@ end
 
 configuration_options = 
 {
+	AddSectionTitle("Keybinds"),
 	AddConfig("Key to Open", "OPENKEY", keyslist, 118, "Assign a key"),
-	AddConfig("Open Mode", "TOGGLEMODE", bool, true, "Toggle / Hold")
+	AddSectionTitle("Settings"),
+	AddConfig("Open Mode", "TOGGLEMODE", bool, true, "Toggle / Hold"),
+	AddConfig("Map icon size", "IGLO_ICON_SIZE", icons, "iglobig", "Pronounced / Subtle"),
+	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Enabled / Disabled"),
+	AddConfig("Igloo numbers", "IGLO_NUMBERS", boolnohover, true, "Enabled / Disabled")
 }
