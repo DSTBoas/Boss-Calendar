@@ -172,20 +172,22 @@ function BossCalendar:Update()
 	end
 end
 
-local function GetCamp(pos)
+local function GetCamp(pos, npc)
     local closest, closeness
     for k,v in pairs(WalrusCamps) do
-        if closeness == nil or pos:Dist(v) < closeness then
-            closest = k
-            closeness = pos:Dist(v)
-        end
+    	if k == 1 and not BossCalendar.trackers[npc] or k ~= 1 and not BossCalendar.trackers[npc .. " " .. k] then
+	        if closeness == nil or pos:Dist(v) < closeness then
+	            closest = k
+	            closeness = pos:Dist(v)
+	        end
+	    end
     end
     return closest
 end
 
 local function LinkWalrus(npc, inst)
     if not inst then return npc end
-    local walrus = GetCamp(inst:GetPosition())
+    local walrus = GetCamp(inst:GetPosition(), npc)
     if walrus and walrus ~= 1 then
         return inst.name.." "..walrus
     end
@@ -268,7 +270,6 @@ function BossCalendar:Open()
             if _G.TheInput:IsControlPressed(_G.CONTROL_FORCE_INSPECT) then
                 self:Image_ClickHandle(npc)
             end
-            --self:KilledMonster(npc)
         end
     end
 

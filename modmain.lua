@@ -46,7 +46,6 @@ local function ValidateDeath(prefab, bypass)
 	if Player then
 		local npc = FindNpc(prefab)
 		if not npc then return end
-		print(npc.name)
 		if bypass then BossCalendar:KilledMonster("Fuelweaver") return end
 		if CanConfirm[prefab] and npc.AnimState:IsCurrentAnimation("death") then
 			BossCalendar:KilledMonster(npc.name)
