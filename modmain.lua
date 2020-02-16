@@ -125,9 +125,11 @@ end
 
 if OPENKEY then
 	if not TOGGLEMODE then
+		GLOBAL.TheInput:AddKeyDownHandler(OPENKEY, Display)
 		GLOBAL.TheInput:AddKeyUpHandler(OPENKEY, Hide)
+	else
+		GLOBAL.TheInput:AddKeyUpHandler(OPENKEY, Display)
 	end
-	GLOBAL.TheInput:AddKeyDownHandler(OPENKEY, Display)
 end
 
 local function ModInit(inst)
