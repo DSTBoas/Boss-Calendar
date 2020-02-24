@@ -112,7 +112,7 @@ end
 local function Display()
 	if CanToggle() and BossCalendar:Open() then 
 		TheFrontEnd:PushScreen(BossCalendar)
-	elseif TOGGLEMODE and CanToggle()  then
+	elseif TOGGLEMODE and CanToggle() then
 		BossCalendar:Close()
 	end
 end
