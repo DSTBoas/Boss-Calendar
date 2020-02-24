@@ -101,7 +101,7 @@ AddPrefabPostInit("skeletonhat", function()
 end)
 
 local function CanToggle()
-	if  TheFrontEnd and 
+	if  	TheFrontEnd and 
 		TheFrontEnd:GetActiveScreen() and 
 		TheFrontEnd:GetActiveScreen().name then 
 		return TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "BossCalendar"
