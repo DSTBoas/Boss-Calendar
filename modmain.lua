@@ -22,7 +22,7 @@ end
 
 AddSimPostInit(function()
 	TheWorld = GLOBAL.TheWorld
-    BossCalendar:LoadCampPositions()
+	BossCalendar:LoadCampPositions()
 end)
 
 local function FindNpc(prefab)
