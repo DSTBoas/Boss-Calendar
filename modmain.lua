@@ -27,7 +27,7 @@ end)
 
 local function FindNpc(prefab)
 	local x,y,z = Player.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z, 20)
+	local ents = TheSim:FindEntities(x,y,z, 20)
 	for _,v in pairs(ents) do
 		if v.prefab == prefab then
 			return v
