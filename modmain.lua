@@ -25,17 +25,16 @@ local Prefabs =
 		death_anim = true
 	},
 	klaussackkey = {
-		npc = "klaus"
+		npc = "klaus",
+		death_anim = true
 	},
 	blowdart_pipe = {
 		npc = "walrus"
 	},
-	malbatross_beak = 
-	{
+	malbatross_beak = {
 		npc = "malbatross"
 	},
-	skeletonhat = 
-	{
+	skeletonhat = {
 		npc = "stalker_atrium",
 		override = true
 	}
@@ -82,26 +81,24 @@ local function OnRemove(inst)
 end
 
 local function ValidateDeath(inst)
-	if not Player or not TheWorld or not inst or not Prefabs[inst.prefab] then return end
-	Player:DoTaskInTime(0, function()
-		local npc = FindNpc(Prefabs[inst.prefab].npc)
-		if not npc then return end
-		if Prefabs[inst.prefab].override then
-			BossCalendar:KilledMonster("Fuelweaver")
-			return
+	if not Player or not TheWorld then return end
+	local npc = FindNpc(Prefabs[inst.prefab].npc)
+	if not npc then return end
+	if Prefabs[inst.prefab].override then
+		BossCalendar:KilledMonster("Fuelweaver")
+		return
+	end
+	if Prefabs[inst.prefab].death_anim then 
+		if npc.AnimState:IsCurrentAnimation("death") then
+			BossCalendar:KilledMonster(npc.name)
 		end
-		if Prefabs[inst.prefab].death_anim then 
-			if npc.AnimState:IsCurrentAnimation("death") then
-				BossCalendar:KilledMonster(npc.name)
-			end
-			return
+		return
+	end
+	npc:ListenForEvent("onremove", OnRemove)
+	Player:DoTaskInTime(10, function() 
+		if npc then 
+			npc:RemoveEventCallback("onremove", OnRemove) 
 		end
-		npc:ListenForEvent("onremove", OnRemove)
-		Player:DoTaskInTime(10, function() 
-			if npc then 
-				npc:RemoveEventCallback("onremove", OnRemove) 
-			end
-		end)
 	end)
 end
 
@@ -110,7 +107,7 @@ for prefab in pairs(Prefabs) do
 end
 
 local function CanToggle()
-	if  TheFrontEnd and 
+	if	TheFrontEnd and 
 		TheFrontEnd:GetActiveScreen() and 
 		TheFrontEnd:GetActiveScreen().name then 
 		return TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar"
