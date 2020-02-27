@@ -23,20 +23,20 @@ server_filter_tags = {}
 local COLORNAMES =
 {
 	"White",
-    "Red",
-    "Coral",
-    "Orange",
-    "Yellow",
-    "Khaki",
-    "Chocolate",
-    "Brown",
-    "Green",
-    "Light Green",
-    "Cyan",
-    "Blue",
-    "Light Blue",
-    "Purple",
-    "Pink"
+	"Red",
+	"Coral",
+	"Orange",
+	"Yellow",
+	"Khaki",
+	"Chocolate",
+	"Brown",
+	"Green",
+	"Light Green",
+	"Cyan",
+	"Blue",
+	"Light Blue",
+	"Purple",
+	"Pink"
 }
 
 local function AddConfig(label, name, options, default, hover)
