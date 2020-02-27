@@ -20,31 +20,30 @@ all_clients_require_mod = false
 client_only_mod = true
 server_filter_tags = {}
 
-local COLORNAMES =
-{
+local COLORNAMES = {
 	"White",
-    "Red",
-    "Coral",
-    "Orange",
-    "Yellow",
-    "Khaki",
-    "Chocolate",
-    "Brown",
-    "Green",
-    "Light Green",
-    "Cyan",
-    "Blue",
-    "Light Blue",
-    "Purple",
-    "Pink"
+	"Red",
+	"Coral",
+	"Orange",
+	"Yellow",
+	"Khaki",
+	"Chocolate",
+	"Brown",
+	"Green",
+	"Light Green",
+	"Cyan",
+	"Blue",
+	"Light Blue",
+	"Purple",
+	"Pink"
 }
 
 local function AddConfig(label, name, options, default, hover)
-    return {label = label, name = name, options = options, default = default, hover = hover or ""}
+	return {label = label, name = name, options = options, default = default, hover = hover or ""}
 end
 
 local function AddSectionTitle(title)
-    return AddConfig(title, "", {{description = "", data = 0}}, 0)
+	return AddConfig(title, "", {{description = "", data = 0}}, 0)
 end
 
 local colors = {}
