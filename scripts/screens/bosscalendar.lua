@@ -152,7 +152,7 @@ function BossCalendar:Load(color, indays, announce_style, announce_indays)
 	if #SavedTrackersTab > 0 then
 		local s = {}
 		for k,v in pairs(SavedTrackersTab) do
-			if v > 0 then
+			if v > 0 and npcs[k] then
 				local time = v - GetServerTime()
 				if time > 0 then
 					self.trackers[npcs[k]] = v
