@@ -33,9 +33,9 @@ local NameToColor = {
 	Khaki				= RGB(240, 230, 140),
 	Chocolate			= RGB(210, 105, 30),
 	Brown				= RGB(165, 42, 42),
-	["Light Green"] 	= RGB(144, 238, 144),
+	["Light Green"]		= RGB(144, 238, 144),
 	Cyan				= RGB(0, 255, 255),
-	["Light Blue"] 		= RGB(173, 216, 230),
+	["Light Blue"]		= RGB(173, 216, 230),
 	Purple				= RGB(128, 0, 128),
 	Pink				= RGB(255, 192, 203)
 }
