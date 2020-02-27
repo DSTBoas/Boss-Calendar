@@ -7,10 +7,10 @@ local TOGGLEMODE = GetModConfigData("TOGGLEMODE")
 local IGLOICON = GetModConfigData("IGLO_ICON_SIZE")
 local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
-local GLOBAL, TheWorld, Player = GLOBAL
-local require = GLOBAL.require
+local GLOBAL, require, TheWorld, Player = GLOBAL, GLOBAL.require
 local BossCalendar = require("screens/bosscalendar")
-local prefabs =
+local SearchTags = {"epic", "walrus"}
+local Prefabs =
 {
 	yellowgem = {
 		npc = "dragonfly",
@@ -33,6 +33,11 @@ local prefabs =
 	malbatross_beak = 
 	{
 		npc = "malbatross"
+	},
+	skeletonhat = 
+	{
+		npc = "stalker_atrium",
+		override = true
 	}
 }
 
@@ -63,10 +68,10 @@ end)
 
 local function FindNpc(prefab)
 	local x, y, z = Player.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x, y, z, 20)
-	for _, v in pairs(ents) do
-		if v.prefab == prefab then
-			return v
+	local ents = TheSim:FindEntities(x, y, z, 50, nil, nil, SearchTags)
+	for i = 1, #ents do
+		if ents[i].prefab == prefab then
+			return ents[i]
 		end
 	end
 	return
@@ -77,32 +82,32 @@ local function OnRemove(inst)
 end
 
 local function ValidateDeath(inst)
-	if not Player or not TheWorld then return end
-	local npc = FindNpc(prefabs[inst.prefab].npc)
-	if not npc then return end
-	if prefabs[inst.prefab].death_anim then 
-		if npc.AnimState:IsCurrentAnimation("death") then
-			BossCalendar:KilledMonster(npc.name)
+	if not Player or not TheWorld or not inst or not Prefabs[inst.prefab] then return end
+	Player:DoTaskInTime(0, function()
+		local npc = FindNpc(Prefabs[inst.prefab].npc)
+		if not npc then return end
+		if Prefabs[inst.prefab].override then
+			BossCalendar:KilledMonster("Fuelweaver")
+			return
 		end
-		return
-	end
-	npc:ListenForEvent("onremove", OnRemove)
-	Player:DoTaskInTime(10, function() 
-		if npc then 
-			npc:RemoveEventCallback("onremove", OnRemove) 
+		if Prefabs[inst.prefab].death_anim then 
+			if npc.AnimState:IsCurrentAnimation("death") then
+				BossCalendar:KilledMonster(npc.name)
+			end
+			return
 		end
+		npc:ListenForEvent("onremove", OnRemove)
+		Player:DoTaskInTime(10, function() 
+			if npc then 
+				npc:RemoveEventCallback("onremove", OnRemove) 
+			end
+		end)
 	end)
 end
 
-for prefab in pairs(prefabs) do
+for prefab in pairs(Prefabs) do
 	AddPrefabPostInit(prefab, ValidateDeath)
 end
-
-AddPrefabPostInit("skeletonhat", function() 
-	if TheWorld and TheWorld:HasTag("cave") then
-		ValidateDeath("atrium_gate", true)
-	end
-end)
 
 local function CanToggle()
 	if  TheFrontEnd and 

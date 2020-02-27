@@ -119,11 +119,10 @@ end
 
 function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
 	local campExists = Walrus_CampPositionExists(CeilVector(pos))
-	local save = false
 	if not campExists then
 		InsertCamp(pos)
 		campExists = Walrus_CampPositionExists(CeilVector(pos))
-		save = true
+		SaveCampPositions()
 	end
 	if iglonumbers then
 		local label = inst.entity:AddLabel()
@@ -135,9 +134,6 @@ function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
 	end
 	if mapicons then
 		inst.MiniMapEntity:SetIcon("iglo_" .. campExists .. ".tex")
-	end
-	if save then
-		SaveCampPositions()
 	end
 end
 
@@ -271,8 +267,8 @@ local function LinkWalrus(npc, inst)
 	return inst.name
 end
 
-function BossCalendar:KilledMonster(npc, inst)
-	if npc == "MacTusk" then
+function BossCalendar:KilledMonster(npc)
+	if npc == "MacTusk" and inst then
 		npc = LinkWalrus(npc, inst)
 	end
 	if self.trackers and not self.trackers[npc] then
