@@ -21,23 +21,23 @@ local function RGB(r, g, b)
 end
 
 local NameToColor = {
-	White			= RGB(255, 255 ,255),
-	Red 			= RGB(255, 0, 0),
-	Green			= RGB(0, 255, 0),
-	Blue			= RGB(0, 0, 255),
+	White				= RGB(255, 255 ,255),
+	Red 				= RGB(255, 0, 0),
+	Green				= RGB(0, 255, 0),
+	Blue				= RGB(0, 0, 255),
 
-	Yellow			= RGB(255, 255, 0),
-	Crimsom			= RGB(220, 20, 60),
-	Coral			= RGB(255, 127, 80),
-	Orange			= RGB(255, 165, 0),
-	Khaki			= RGB(240, 230, 140),
-	Chocolate		= RGB(210, 105, 30),
-	Brown			= RGB(165, 42, 42),
-	["Light Green"] = RGB(144, 238, 144),
-	Cyan			= RGB(0, 255, 255),
-	["Light Blue"]	= RGB(173, 216, 230),
-	Purple			= RGB(128, 0, 128),
-	Pink			= RGB(255, 192, 203)
+	Yellow				= RGB(255, 255, 0),
+	Crimsom				= RGB(220, 20, 60),
+	Coral				= RGB(255, 127, 80),
+	Orange				= RGB(255, 165, 0),
+	Khaki				= RGB(240, 230, 140),
+	Chocolate			= RGB(210, 105, 30),
+	Brown				= RGB(165, 42, 42),
+	["Light Green"] 	= RGB(144, 238, 144),
+	Cyan				= RGB(0, 255, 255),
+	["Light Blue"] 		= RGB(173, 216, 230),
+	Purple				= RGB(128, 0, 128),
+	Pink				= RGB(255, 192, 203)
 }
 
 local RespawnDurations = {
