@@ -212,7 +212,7 @@ local function SecondsToTime(seconds, announce)
 end
 
 function BossCalendar:Update()
-	if not self.open or not self.trackers then return end
+	if not self.open then return end
 	for i, npc in pairs(npcs) do
 		if self.trackers[npc] then
 			self[npc.."img"]:SetTint(0,0,0,1)
@@ -268,7 +268,7 @@ local function LinkWalrus(npc, inst)
 end
 
 function BossCalendar:KilledMonster(npc, inst)
-	if npc == "MacTusk" and inst then
+	if npc == "MacTusk" then
 		npc = LinkWalrus(npc, inst)
 	end
 	if self.trackers and not self.trackers[npc] then
