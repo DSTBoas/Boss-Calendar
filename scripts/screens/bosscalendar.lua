@@ -268,10 +268,13 @@ local function LinkWalrus(npc, inst)
 end
 
 function BossCalendar:KilledMonster(npc, inst)
+	if not self.trackers then return end
+
 	if npc == "MacTusk" then
 		npc = LinkWalrus(npc, inst)
 	end
-	if self.trackers and not self.trackers[npc] then
+
+	if not self.trackers[npc] then
 		local respawnDuration = RespawnDurations[Trim(npc)] or 9600
 		local respawnServerTime = GetServerTime() + respawnDuration
 		self.trackers[npc] = respawnServerTime
