@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "1.7"
+version = "1.75"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
@@ -19,6 +19,7 @@ dst_compatible = true
 all_clients_require_mod = false
 client_only_mod = true
 server_filter_tags = {}
+
 
 local COLORNAMES = {
 	"White",
@@ -91,10 +92,10 @@ configuration_options =
 	AddConfig("Key to open", "OPENKEY", keyslist, 118, "Assign a key"),
 	AddSectionTitle("Settings"),
 	AddConfig("Open mode", "TOGGLEMODE", bool, true, "Toggle / Hold"),
-	AddConfig("Boss Calendar time units", "TIME_UNITS", boolunits, true, "Game days / Real time"),
+	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Game days / Real time"),
 	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Game days / Real time"),
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
-	AddConfig("Reminder color", "SAYCOLOR", colors, "Green", "Choose a color"),
+	AddConfig("Reminder color", "SAY_COLOR", colors, "Green", "Choose a color"),
 	AddConfig("Map icon size", "IGLO_ICON_SIZE", icons, "iglobig", "Big / Small"),
 	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
 	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them")

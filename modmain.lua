@@ -1,16 +1,15 @@
 local OPENKEY = GetModConfigData("OPENKEY")
-local SAYCOLOR = GetModConfigData("SAYCOLOR")
-local TIME_UNITS = GetModConfigData("TIME_UNITS")
+local SAY_COLOR = GetModConfigData("SAYCOLOR")
+local CALENDAR_UNITS = GetModConfigData("CALENDAR_UNITS")
 local ANNOUNCE_STYLE = GetModConfigData("ANNOUNCE_STYLES")
 local ANNOUNCE_UNITS = GetModConfigData("ANNOUNCE_UNITS")
 local TOGGLEMODE = GetModConfigData("TOGGLEMODE")
-local IGLOICON = GetModConfigData("IGLO_ICON_SIZE")
+local IGLO_ICON = GetModConfigData("IGLO_ICON_SIZE")
 local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
-local GLOBAL, require, TheWorld, Player = GLOBAL, GLOBAL.require
+local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
-local Prefabs =
-{
+local Prefabs = {
 	yellowgem = {
 		npc = "Dragonfly",
 		death_anim = {"death"}
@@ -43,25 +42,23 @@ local Prefabs =
 
 Assets = {
 	Asset("ATLAS", "images/npcs.xml"),
-	Asset("ATLAS", "images/"..IGLOICON..".xml"),
+	Asset("ATLAS", "images/"..IGLO_ICON..".xml"),
 }
-AddMinimapAtlas("images/"..IGLOICON..".xml")
+AddMinimapAtlas("images/"..IGLO_ICON..".xml")
 
 if MAPICONS_ENABLED then
 	AddClassPostConstruct("widgets/mapwidget", function(self)
-		BossCalendar:AddMapIcons(self, IGLOICON)
+		BossCalendar:AddMapIcons(self, IGLO_ICON)
 	end)
 end
 
 AddPrefabPostInit("walrus_camp", function(inst)
 	inst:DoTaskInTime(0, function()
 		if inst and inst:IsValid() then
-			BossCalendar:AddCamp(inst, inst:GetPosition(), IGLOICON, IGLO_NUMBERS)
+			BossCalendar:AddCamp(inst, inst:GetPosition(), IGLO_ICON, IGLO_NUMBERS)
 		end
 	end)
 end)
-
-AddSimPostInit(function() BossCalendar:LoadCampPositions() end)
 
 local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -82,9 +79,7 @@ end
 
 for prefab in pairs(Prefabs) do
 	AddPrefabPostInit(prefab, function(inst)
-		if Player then
-			Player:DoTaskInTime(0, function() ValidateDeath(inst) end)
-		end
+		inst:DoTaskInTime(0, function() ValidateDeath(inst) end)
 	end)
 end
 
@@ -98,14 +93,16 @@ local function CanToggle()
 end
 
 local function Display()
-	if CanToggle() and BossCalendar:Open() then 
-		TheFrontEnd:PushScreen(BossCalendar)
-	elseif TOGGLEMODE and CanToggle() then
-		BossCalendar:Close()
+	if CanToggle() then
+		if BossCalendar:Open() then 
+			TheFrontEnd:PushScreen(BossCalendar)
+		elseif TOGGLEMODE then
+			BossCalendar:Close()
+		end
 	end
 end
 
-local function Hide()
+local function Close()
 	if CanToggle() then
 		BossCalendar:Close()
 	end
@@ -113,18 +110,18 @@ end
 
 if OPENKEY then
 	if not TOGGLEMODE then
-		GLOBAL.TheInput:AddKeyDownHandler(OPENKEY, Display)
-		GLOBAL.TheInput:AddKeyUpHandler(OPENKEY, Hide)
+		TheInput:AddKeyDownHandler(OPENKEY, Display)
+		TheInput:AddKeyUpHandler(OPENKEY, Close)
 	else
-		GLOBAL.TheInput:AddKeyUpHandler(OPENKEY, Display)
+		TheInput:AddKeyUpHandler(OPENKEY, Display)
 	end
 end
 
 local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
 		if inst == GLOBAL.ThePlayer then
-			Player = GLOBAL.ThePlayer
-			BossCalendar:Load(SAYCOLOR, TIME_UNITS, ANNOUNCE_STYLE, ANNOUNCE_UNITS)
+			BossCalendar:Load(SAY_COLOR, CALENDAR_UNITS, ANNOUNCE_STYLE, ANNOUNCE_UNITS)
+			BossCalendar:LoadCampPositions()
 		end
 	end)
 end
