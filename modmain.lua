@@ -53,7 +53,9 @@ end
 
 AddPrefabPostInit("walrus_camp", function(inst)
 	inst:DoTaskInTime(0, function()
-		BossCalendar:AddCamp(inst, inst:GetPosition(), IGLOICON, IGLO_NUMBERS)
+		if inst and inst:IsValid() then
+			BossCalendar:AddCamp(inst, inst:GetPosition(), IGLOICON, IGLO_NUMBERS)
+		end
 	end)
 end)
 

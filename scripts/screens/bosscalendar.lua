@@ -115,7 +115,7 @@ end
 
 function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
 	local campExists = Walrus_CampPositionExists(CeilVector(pos))
-	if not campExists then
+	if not campExists then 
 		table.insert(WalrusCamps, CeilVector(pos))
 		campExists = Walrus_CampPositionExists(CeilVector(pos))
 		SaveCampPositions()
