@@ -275,7 +275,7 @@ end
 
 function BossCalendar:KilledMonster(npc, inst)
 	if not self.trackers then return end
-
+	
 	if npc == "MacTusk" then
 		npc = LinkWalrus(npc, inst)
 	end

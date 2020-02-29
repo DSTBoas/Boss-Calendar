@@ -12,30 +12,32 @@ local BossCalendar = require("screens/bosscalendar")
 local Prefabs =
 {
 	yellowgem = {
-		npc = "dragonfly",
-		death_anim = true
+		npc = "Dragonfly",
+		death_anim = {"death"}
 	},
 	hivehat = {
-		npc = "beequeen",
-		death_anim = true
+		npc = "Bee Queen",
+		death_anim = {"death"}
 	},
 	shroom_skin = {
-		npc = "toadstool",
-		death_anim = true
+		npc = "Toadstool",
+		death_anim = {"death"}
 	},
 	klaussackkey = {
-		npc = "klaus",
-		death_anim = true
+		npc = "Klaus",
+		death_anim = {"death"}
 	},
 	blowdart_pipe = {
-		npc = "walrus"
+		npc = "MacTusk",
+		death_anim = {"death"}
 	},
 	malbatross_beak = {
-		npc = "malbatross"
+		npc = "Malbatross",
+		death_anim = {"death_ocean", "death"}
 	},
 	skeletonhat = {
-		npc = "stalker_atrium",
-		override = true
+		npc = "Fuelweaver",
+		death_anim = {"death3"}
 	}
 }
 
@@ -61,35 +63,21 @@ end)
 
 AddSimPostInit(function() BossCalendar:LoadCampPositions() end)
 
-local function GetNpc(inst, prefab)
+local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
 	local ents = TheSim:FindEntities(x, y, z, 15, 0, 0, {"epic", "walrus"})
 	return #ents > 0 and ents[1]
 end
 
-local function OnRemove(inst)
-	BossCalendar:KilledMonster(inst.name, inst)
-end
-
 local function ValidateDeath(inst)
-	local npc = GetNpc(inst, Prefabs[inst.prefab].npc)
+	local npc = GetNpc(inst)
 	if not npc then return end
-	if Prefabs[inst.prefab].override then
-		BossCalendar:KilledMonster("Fuelweaver")
-		return
-	end
-	if Prefabs[inst.prefab].death_anim then 
-		if npc.AnimState:IsCurrentAnimation("death") then
-			BossCalendar:KilledMonster(npc.name)
+	for i = 1, #Prefabs[inst.prefab].death_anim do
+		if npc.AnimState:IsCurrentAnimation(Prefabs[inst.prefab].death_anim[i]) then
+			BossCalendar:KilledMonster(Prefabs[inst.prefab].npc, npc)
+			return
 		end
-		return
 	end
-	npc:ListenForEvent("onremove", OnRemove)
-	Player:DoTaskInTime(10, function() 
-		if npc then 
-			npc:RemoveEventCallback("onremove", OnRemove) 
-		end
-	end)
 end
 
 for prefab in pairs(Prefabs) do
