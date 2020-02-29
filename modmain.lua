@@ -9,7 +9,6 @@ local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 local GLOBAL, require, TheWorld, Player = GLOBAL, GLOBAL.require
 local BossCalendar = require("screens/bosscalendar")
-local SearchTags = {"epic", "walrus"}
 local Prefabs =
 {
 	yellowgem = {
@@ -44,9 +43,9 @@ Assets = {
 	Asset("ATLAS", "images/npcs.xml"),
 	Asset("ATLAS", "images/"..IGLOICON..".xml"),
 }
+AddMinimapAtlas("images/"..IGLOICON..".xml")
 
 if MAPICONS_ENABLED then
-	AddMinimapAtlas("images/"..IGLOICON..".xml")
 	AddClassPostConstruct("widgets/mapwidget", function(self)
 		BossCalendar:AddMapIcons(self, IGLOICON)
 	end)
@@ -54,26 +53,16 @@ end
 
 AddPrefabPostInit("walrus_camp", function(inst)
 	inst:DoTaskInTime(0, function()
-		if inst:IsValid() then
-			BossCalendar:AddCamp(inst, inst:GetPosition(), MAPICONS_ENABLED, IGLO_NUMBERS)
-		end
+		BossCalendar:AddCamp(inst, inst:GetPosition(), IGLOICON, IGLO_NUMBERS)
 	end)
 end)
 
-AddSimPostInit(function()
-	TheWorld = GLOBAL.TheWorld
-	BossCalendar:LoadCampPositions()
-end)
+AddSimPostInit(function() BossCalendar:LoadCampPositions() end)
 
-local function FindNpc(prefab)
-	local x, y, z = Player.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x, y, z, 50, nil, nil, SearchTags)
-	for i = 1, #ents do
-		if ents[i].prefab == prefab then
-			return ents[i]
-		end
-	end
-	return
+local function GetNpc(inst, prefab)
+	local x, y, z = inst.Transform:GetWorldPosition()
+	local ents = TheSim:FindEntities(x, y, z, 15, 0, 0, {"epic", "walrus"})
+	return #ents > 0 and ents[1]
 end
 
 local function OnRemove(inst)
@@ -81,8 +70,7 @@ local function OnRemove(inst)
 end
 
 local function ValidateDeath(inst)
-	if not Player or not TheWorld then return end
-	local npc = FindNpc(Prefabs[inst.prefab].npc)
+	local npc = GetNpc(inst, Prefabs[inst.prefab].npc)
 	if not npc then return end
 	if Prefabs[inst.prefab].override then
 		BossCalendar:KilledMonster("Fuelweaver")
@@ -103,7 +91,11 @@ local function ValidateDeath(inst)
 end
 
 for prefab in pairs(Prefabs) do
-	AddPrefabPostInit(prefab, ValidateDeath)
+	AddPrefabPostInit(prefab, function(inst)
+		if Player then
+			Player:DoTaskInTime(0, function() ValidateDeath(inst) end)
+		end
+	end)
 end
 
 local function CanToggle()

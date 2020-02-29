@@ -8,7 +8,7 @@ local StatusAnnouncer = require("announcer")()
 
 local DataContainer = PersistentData("BossCalendar")
 local SavedTrackersTab, WalrusCamps = {}, {}
-local npcs = {"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", "Fuelweaver","MacTusk","MacTusk II","MacTusk III","MacTusk IV"}
+local npcs = {"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", "Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", "MacTusk IV"}
 local Step, Session, Sayfn, SayColor, TimeInDays, AnnounceStyle, AnnounceTimeInDays = 1/255
 local BossCalendar = Class(Screen)
 
@@ -73,27 +73,27 @@ end
 
 function BossCalendar:AddMapIcons(widget, icon)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
-	for i, pos in ipairs(WalrusCamps) do
-		widget.camp_icons:AddMapIcon("images/"..icon..".xml", icon.."_".. i ..".tex", pos)
+	for i = 1, #WalrusCamps do
+		widget.camp_icons:AddMapIcon("images/"..icon..".xml", icon.."_".. i ..".tex", WalrusCamps[i])
 	end
 end
 
 function BossCalendar:LoadCampPositions()
 	DataContainer:Load()
-	local s_camps = DataContainer:GetValue(tostring(TheWorld.meta.seed))
-	if s_camps then
-		for i, pos in ipairs(s_camps) do
-			WalrusCamps[i] = Vector3(pos.x, pos.y, pos.z)
+	local camps = DataContainer:GetValue(tostring(TheWorld.meta.seed))
+	if camps then
+		for i = 1, #camps do
+			WalrusCamps[i] = Vector3(camps[i].x, camps[i].y, camps[i].z)
 		end
 	end
 end
 
 local function SaveCampPositions()
-	local s_camps = {}
-	for i, pos in ipairs(WalrusCamps) do
-		s_camps[i] = {x = pos.x, y = pos.y, z = pos.z}
+	local camps = {}
+	for i = 1, #WalrusCamps do
+		camps[i] = Vector3(WalrusCamps[i].x, WalrusCamps[i].y, WalrusCamps[i].z)
 	end
-	DataContainer:SetValue(tostring(TheWorld.meta.seed), s_camps)
+	DataContainer:SetValue(tostring(TheWorld.meta.seed), camps)
 	DataContainer:Save()
 end
 
@@ -104,23 +104,19 @@ local function CeilVector(pos)
 	return pos
 end
 
-local function Walrus_CampPositionExists(new_pos)   
-	for i, pos in ipairs(WalrusCamps) do
-		if pos:__eq(new_pos) then 
-			return i 
+local function Walrus_CampPositionExists(pos)
+	for i = 1, #WalrusCamps do
+		if WalrusCamps[i]:__eq(pos) then
+			return i
 		end
 	end
 	return
 end
 
-local function InsertCamp(pos)
-	table.insert(WalrusCamps, CeilVector(pos))
-end
-
 function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
 	local campExists = Walrus_CampPositionExists(CeilVector(pos))
 	if not campExists then
-		InsertCamp(pos)
+		table.insert(WalrusCamps, CeilVector(pos))
 		campExists = Walrus_CampPositionExists(CeilVector(pos))
 		SaveCampPositions()
 	end
@@ -133,7 +129,7 @@ function BossCalendar:AddCamp(inst, pos, mapicons, iglonumbers)
 		label:Enable(true)
 	end
 	if mapicons then
-		inst.MiniMapEntity:SetIcon("iglo_" .. campExists .. ".tex")
+		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex",mapicons,campExists))
 	end
 end
 
@@ -141,39 +137,43 @@ function BossCalendar:Load(color, indays, announce_style, announce_indays)
 	AnnounceStyle = announce_style
 	AnnounceTimeInDays = announce_indays
 	TimeInDays = indays
-	Sayfn = ThePlayer.components.talker.Say
 	SayColor = NameToColor[color]
+
+	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
 	ThePlayer:ListenForEvent("timerdone", OnTimerDone)
+
 	DataContainer:Load()
 	Session = tostring(TheWorld.net.components.shardstate:GetMasterSessionId())
 	self.trackers = {}
 	SavedTrackersTab = DataContainer:GetValue(Session .. "timers") or SavedTrackersTab
+
 	if #SavedTrackersTab > 0 then
 		local s = {}
-		for k,v in pairs(SavedTrackersTab) do
-			if v > 0 and npcs[k] then
-				local time = v - GetServerTime()
+		for i = 1, #SavedTrackersTab do
+			if SavedTrackersTab[i] > 0 and npcs[i] then
+				local time = SavedTrackersTab[i] - GetServerTime()
 				if time > 0 then
-					self.trackers[npcs[k]] = v
-					ThePlayer.components.timer:StartTimer(npcs[k], time)
+					self.trackers[npcs[i]] = SavedTrackersTab[i]
+					ThePlayer.components.timer:StartTimer(npcs[i], time)
 				else
-					SavedTrackersTab[k] = 0
-					table.insert(s, npcs[k])
+					SavedTrackersTab[i] = 0
+					table.insert(s, npcs[i])
 				end
 			end
 		end
-		if #s == 0 then return end
-		ThePlayer:DoTaskInTime(5, function()
-			BossCalendar:Say(table.concat(s,", ") .. (#s == 1 and " has" or " have") .. " respawned.", 5)
-			self:Save()
-		end)        
+		if #s > 0 then
+			ThePlayer:DoTaskInTime(5, function()
+				self:Say(table.concat(s,", ") .. (#s == 1 and " has" or " have") .. " respawned.", 5)
+				self:Save()
+			end)
+		end      
 	end
 end
 
 function BossCalendar:Save()
-	for i, npc in pairs(npcs) do
-		SavedTrackersTab[i] = self.trackers[npc] or 0
+	for i = 1, #npcs do
+		SavedTrackersTab[i] = self.trackers[npcs[i]] or 0
 	end
 	DataContainer:SetValue(Session .. "timers", SavedTrackersTab)
 	DataContainer:Save()
@@ -181,7 +181,7 @@ function BossCalendar:Save()
 end
 
 local function SecondsToDays(seconds)
-	local formattedString = string.format("%.1f", ( (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME ) )
+	local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
 	local tonumberString = tonumber(formattedString)
 	if formattedString == "0.0" then
 		formattedString = "0.1"
@@ -212,66 +212,75 @@ local function SecondsToTime(seconds, announce)
 end
 
 function BossCalendar:Update()
-	if not self.open or not self.trackers then return end
-	for i, npc in pairs(npcs) do
-		if self.trackers[npc] then
-			self[npc.."img"]:SetTint(0,0,0,1)
-			self[npc]:SetColour(1,0,0,1)
+	if not self.open then return end
+	for i = 1, #npcs do
+		if self.trackers[npcs[i]] then
+			self[npcs[i].."img"]:SetTint(0,0,0,1)
+			self[npcs[i]]:SetColour(1,0,0,1)
 			local str
 			if TimeInDays then
-				str = SecondsToDays(self.trackers[npc]) .. "d"
+				str = SecondsToDays(self.trackers[npcs[i]]) .. "d"
 			else
-				str = SecondsToTime(self.trackers[npc])
+				str = SecondsToTime(self.trackers[npcs[i]])
 			end
-			self[npc]:SetString(str)
+			self[npcs[i]]:SetString(str)
 		else
-			self[npc]:SetColour(1,1,1,1)
-			self[npc.."img"]:SetTint(1,1,1,1)
-			self[npc]:SetString(npc)
+			self[npcs[i]]:SetColour(1,1,1,1)
+			self[npcs[i].."img"]:SetTint(1,1,1,1)
+			self[npcs[i]]:SetString(npcs[i])
 		end
 	end
 end
 
 local function GetTableName(walrus)
 	local c = 1
-	for i, npc in pairs(npcs) do
-		if Trim(npc) == "MacTusk" then
+
+	for i = 1, #npcs do
+		if Trim(npcs[i]) == "MacTusk" then
 			if walrus == c then
-				return npc
+				return npcs[i]
 			end
 			c = c + 1
 		end
 	end
+
 	return "MacTusk"
 end
 
-local function GetCamp(pos, npc)
+local function GetClosestCamp(pos)
 	local closest, closeness
-	for k,v in pairs(WalrusCamps) do
-		if not BossCalendar.trackers[GetTableName(k)] then
-			if closeness == nil or pos:Dist(v) < closeness then
-				closest = k
-				closeness = pos:Dist(v)
+
+	for i = 1, #WalrusCamps do
+		if not BossCalendar.trackers[GetTableName(i)] then
+			if closeness == nil or pos:Dist(WalrusCamps[i]) < closeness then
+				closest = i
+				closeness = pos:Dist(WalrusCamps[i])
 			end
 		end
 	end
+
 	return closest
 end
 
 local function LinkWalrus(npc, inst)
 	if not inst then return npc end
-	local walrus = GetCamp(inst:GetPosition(), npc)
+
+	local walrus = GetClosestCamp(inst:GetPosition())
 	if walrus and walrus ~= 1 then
 		return GetTableName(walrus)
 	end
-	return inst.name
+
+	return npc
 end
 
 function BossCalendar:KilledMonster(npc, inst)
-	if npc == "MacTusk" and inst then
+	if not self.trackers then return end
+
+	if npc == "MacTusk" then
 		npc = LinkWalrus(npc, inst)
 	end
-	if self.trackers and not self.trackers[npc] then
+
+	if not self.trackers[npc] then
 		local respawnDuration = RespawnDurations[Trim(npc)] or 9600
 		local respawnServerTime = GetServerTime() + respawnDuration
 		self.trackers[npc] = respawnServerTime
@@ -281,7 +290,7 @@ function BossCalendar:KilledMonster(npc, inst)
 end
 
 function BossCalendar:ImageOnClick(npc)
-	local say = string.format("Let's kill %s.", npc)
+	local say = ""
 	if self.trackers[npc] then
 		if AnnounceTimeInDays then
 			if AnnounceStyle == 1 then
@@ -306,6 +315,8 @@ function BossCalendar:ImageOnClick(npc)
 			local glue = respawnDay == "soon" and "" or "in "
 			say = string.format("%s respawns %s%s.", npc, glue, respawnDay)
 		end
+	else
+		say = string.format("Let's kill %s.", npc)
 	end
 	StatusAnnouncer:Announce(say)
 end
@@ -350,28 +361,27 @@ function BossCalendar:Open()
 	self.title:SetPosition(0,215)
 	self.title:SetString("Boss Calendar")
 
-	for i, npc in pairs(npcs) do
-		if self[npc] then self[npc]:Kill() end
-		self[npc] = self.root:AddChild(Text(UIFONT, 25))
-		self[npc]:SetPosition(-255 + ((i-1) % 5 * 120), 140 + (math.floor(i / 6) * -150)) -- 300
-		self[npc]:SetString(npc)
-		local imgName = npc .. "img"
-		if self[imgName] then self[imgName]:Kill() end
-		self[imgName] = self.root:AddChild(Image("images/npcs.xml", Trim(npc)..".tex"))
-		self[imgName]:SetSize(68,68)
-		self[imgName]:SetPosition(-255 + ((i-1) % 5 * 120), 95 + (math.floor(i / 6) * -150)) -- -120
-		self[imgName].OnMouseButton = function(image, button) 
+	for i = 1, #npcs do
+		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
+		local npc_img = npcs[i] .. "img"
+
+		self[npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
+		self[npcs[i]]:SetPosition(x, y + 140)
+		self[npcs[i]]:SetString(npcs[i])
+
+		self[npc_img] = self.root:AddChild(Image("images/npcs.xml", Trim(npcs[i])..".tex"))
+		self[npc_img]:SetSize(68, 68)
+		self[npc_img]:SetPosition(x, y + 95)
+		self[npc_img].OnMouseButton = function(image, button) 
 			if button == 1000 and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) then
-				self:ImageOnClick(npc)
+				self:ImageOnClick(npcs[i])
 			end
 		end
 	end
 
-	self.refresh_task = ThePlayer:DoPeriodicTask(FRAMES * 15, function()
-		self:Update()
-	end)
-
 	self:Update()
+	self.refresh_task = ThePlayer:DoPeriodicTask(FRAMES * 15, function() self:Update() end)
+	
 	return true
 end
 
