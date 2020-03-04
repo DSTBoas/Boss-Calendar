@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "1.75"
+version = "2.0"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
@@ -53,6 +53,11 @@ local announce_styles = {
 	{description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
 	{description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
 }
+local say_duration = {
+	{description = "Short", data = 3, hover = "Reminders last for 3 seconds"},
+	{description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
+	{description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
+}
 local boolunits = {
 	{description = "Days", data = true},
 	{description = "Hours / Minutes", data = false}
@@ -62,7 +67,7 @@ local boolnohover = {
 	{description = "Disabled", data = false}
 }
 local bool = {
-	{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar" },
+	{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar"},
 	{description = "Hold", data = false, hover = "Hold: Holding the key opens the Boss Calendar"}
 }
 local keyslist = {
@@ -79,10 +84,10 @@ end
 
 local string = ""
 for i = 1, 26 do
-	local ch = string.format("%c", (64 + i))
+	local ch = string.format("%c", 64 + i)
 	keyslist[i + 1] = {description = ch, data = ch:lower():byte()}
 	if i < 13 then
-		keyslist[27 + i] = {description = "F" .. i, data = 281 + i}
+		keyslist[27 + i] = {description = "F"..i, data = 281 + i}
 	end
 end
 
@@ -92,11 +97,13 @@ configuration_options =
 	AddConfig("Key to open", "OPENKEY", keyslist, 118, "Assign a key"),
 	AddSectionTitle("Settings"),
 	AddConfig("Open mode", "TOGGLEMODE", bool, true, "Toggle / Hold"),
-	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Game days / Real time"),
-	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Game days / Real time"),
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
-	AddConfig("Reminder color", "SAY_COLOR", colors, "Green", "Choose a color"),
+	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
+	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Short / Default / Long"),
 	AddConfig("Map icon size", "IGLO_ICON_SIZE", icons, "iglobig", "Big / Small"),
 	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
-	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them")
+	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
+	AddSectionTitle("Extra Settings"),
+	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Game days / Real time"),
+	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Game days / Real time"),
 }

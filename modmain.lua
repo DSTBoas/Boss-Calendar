@@ -1,5 +1,6 @@
 local OPENKEY = GetModConfigData("OPENKEY")
-local SAY_COLOR = GetModConfigData("SAYCOLOR")
+local REMINDER_COLOR = GetModConfigData("REMINDER_COLOR")
+local REMINDER_DURATION = GetModConfigData("REMINDER_DURATION")
 local CALENDAR_UNITS = GetModConfigData("CALENDAR_UNITS")
 local ANNOUNCE_STYLE = GetModConfigData("ANNOUNCE_STYLES")
 local ANNOUNCE_UNITS = GetModConfigData("ANNOUNCE_UNITS")
@@ -41,6 +42,7 @@ local Prefabs = {
 }
 
 Assets = {
+	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
 	Asset("ATLAS", "images/"..IGLO_ICON..".xml"),
 }
@@ -55,7 +57,7 @@ end
 AddPrefabPostInit("walrus_camp", function(inst)
 	inst:DoTaskInTime(0, function()
 		if inst and inst:IsValid() then
-			BossCalendar:AddCamp(inst, inst:GetPosition(), IGLO_ICON, IGLO_NUMBERS)
+			BossCalendar:AddCamp(inst, IGLO_ICON, IGLO_NUMBERS)
 		end
 	end)
 end)
@@ -68,11 +70,12 @@ end
 
 local function ValidateDeath(inst)
 	local npc = GetNpc(inst)
-	if not npc then return end
-	for i = 1, #Prefabs[inst.prefab].death_anim do
-		if npc.AnimState:IsCurrentAnimation(Prefabs[inst.prefab].death_anim[i]) then
-			BossCalendar:KilledMonster(Prefabs[inst.prefab].npc, npc)
-			return
+	if npc and npc:IsValid() then
+		for i = 1, #Prefabs[inst.prefab].death_anim do
+			if npc.AnimState:IsCurrentAnimation(Prefabs[inst.prefab].death_anim[i]) then
+				BossCalendar:KilledMonster(Prefabs[inst.prefab].npc, npc)
+				return
+			end
 		end
 	end
 end
@@ -109,20 +112,20 @@ local function Close()
 end
 
 if OPENKEY then
-	if not TOGGLEMODE then
+	if TOGGLEMODE then
+		TheInput:AddKeyUpHandler(OPENKEY, Display)
+	else
 		TheInput:AddKeyDownHandler(OPENKEY, Display)
 		TheInput:AddKeyUpHandler(OPENKEY, Close)
-	else
-		TheInput:AddKeyUpHandler(OPENKEY, Display)
 	end
 end
 
 local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
 		if inst == GLOBAL.ThePlayer then
-			BossCalendar:Load(SAY_COLOR, CALENDAR_UNITS, ANNOUNCE_STYLE, ANNOUNCE_UNITS)
-			BossCalendar:LoadCampPositions()
+			BossCalendar:Init(REMINDER_COLOR, REMINDER_DURATION, CALENDAR_UNITS, ANNOUNCE_STYLE, ANNOUNCE_UNITS)
 		end
 	end)
 end
 AddPlayerPostInit(ModInit)
+AddSimPostInit(function() BossCalendar:LoadIgloos() end)

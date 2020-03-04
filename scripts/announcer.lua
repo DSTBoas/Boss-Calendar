@@ -6,11 +6,15 @@ nil,
 {
 })
 
-function StatusAnnouncer:Announce(message)
-	if not self.cooldown and not self.cooldowns[message] then
+function StatusAnnouncer:CanAnnounce(npc)
+	return not self.cooldown and not self.cooldowns[npc]
+end
+
+function StatusAnnouncer:Announce(message, npc)
+	if not self.cooldown and not self.cooldowns[npc] then
 		local whisper = TheInput:IsKeyDown(KEY_CTRL)
 		self.cooldown = ThePlayer:DoTaskInTime(3, function() self.cooldown = false end)
-		self.cooldowns[message] = ThePlayer:DoTaskInTime(10, function() self.cooldowns[message] = nil end)
+		self.cooldowns[npc] = ThePlayer:DoTaskInTime(10, function() self.cooldowns[npc] = nil end)
 		TheNet:Say(STRINGS.LMB .. " " .. message, whisper)
 	end
 	return true
