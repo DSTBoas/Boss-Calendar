@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.0"
+version = "2.1"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
@@ -60,7 +60,7 @@ local say_duration = {
 }
 local boolunits = {
 	{description = "Days", data = true},
-	{description = "Hours / Minutes", data = false}
+	{description = "Time", data = false}
 }
 local boolnohover = {
 	{description = "Enabled", data = true },
@@ -104,6 +104,7 @@ configuration_options =
 	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
 	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
 	AddSectionTitle("Extra Settings"),
-	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Game days / Real time"),
-	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Game days / Real time"),
+	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Days / Time"),
+	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Days / Time"),
+	AddConfig("Network notifications", "NETWORK_NOTIFICATIONS", boolnohover, true, "Enabled / Disabled"),
 }
