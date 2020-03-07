@@ -326,10 +326,6 @@ end
 
 local BSSC_Data = {}
 
-local function TrimJson(s)
-	return s:match"^%s*(.*%S)%s*$" or ""
-end
-
 local function DataPack(npc, timer, player, camp)
 	BSSC_Data["npc"] = npc
 	BSSC_Data["timer"] = timer
@@ -339,7 +335,7 @@ local function DataPack(npc, timer, player, camp)
 end
 
 local function DataUnpack(str)
-	if str and TrimJson(str) ~= "" and ValidJson(str) then
+	if ValidJson(str) then
 		BSSC_Data = json.decode(str)
 		return true
 	end
@@ -363,7 +359,8 @@ function BossCalendar:NetworkBossKilled(data)
 	if not DataUnpack(data) then return end
 	
 	local npc = BSSC_Data["npc"]
-	
+	if not npc then return end
+
 	if npc:trim() == "MacTusk" then
 		npc = NetworkWalrus(BSSC_Data["camp"])
 		if not npc then return end
