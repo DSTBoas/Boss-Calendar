@@ -348,6 +348,7 @@ end
 
 local function NetworkWalrus(tab)
 	if #WalrusCamps == 0 then return end
+	local pos = Vector3(tab.x, tab.y, tab.z)
 	local closest_camp = GetClosestCamp(pos)
 	return GetTableName(closest_camp)
 end
@@ -381,6 +382,7 @@ end
 local _Networking_Say = Networking_Say
 Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
 	if string.sub(message, 1, 6) == "{BSSC}" then
+		print("Npc death received " .. message)
 		if userid ~= ThePlayer.userid then
 			ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
 		end
