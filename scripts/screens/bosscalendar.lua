@@ -404,7 +404,7 @@ function BossCalendar:KilledMonster(npc, inst)
 			local respawnServerTime = GetServerTime() + respawn_time
 			self.trackers[npc]["timer"] = respawnServerTime
 			ThePlayer.components.timer:StartTimer(npc, respawn_time)
-			local cmd = "{BSSC}" .. DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
+			local cmd = "{BSSC}"..DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
 			TheNet:Say(cmd, false, true)
 			self:AddKill(npc)
 			self:Save()
