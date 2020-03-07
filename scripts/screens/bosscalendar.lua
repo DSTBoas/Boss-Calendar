@@ -38,12 +38,12 @@ local NameToColor = {
 
 local RespawnDurations = {
 	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
-	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME;
-	malbatross = 7200;
+	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
+	malbatross = 7200
 }
 
 function string:trim()
-	return self:gsub("%sI+%a","")
+	return self:gsub("%sI+%a", "")
 end
 
 local function GetServerTime()
@@ -103,14 +103,16 @@ local function Walrus_CampPositionExists(pos)
 	return
 end
 
+local function InsertCamp(pos)
+	table.insert(WalrusCamps, pos)
+	SaveCampPositions()
+	return Walrus_CampPositionExists(pos)
+end
+
 function BossCalendar:AddCamp(inst, map_icons, iglo_numbering)
-	local ceilPos = CeilVector(inst:GetPosition())
-	local campExists = Walrus_CampPositionExists(ceilPos)
-	if not campExists then 
-		table.insert(WalrusCamps, ceilPos)
-		campExists = Walrus_CampPositionExists(ceilPos)
-		SaveCampPositions()
-	end
+	local ceilVector = CeilVector(inst:GetPosition())
+	local campExists = Walrus_CampPositionExists(ceilVector) or InsertCamp(ceilVector)
+
 	if iglo_numbering then
 		inst.entity:AddLabel()
 		inst.Label:SetFont(CHATFONT_OUTLINE)
@@ -119,6 +121,7 @@ function BossCalendar:AddCamp(inst, map_icons, iglo_numbering)
 		inst.Label:SetText(campExists)
 		inst.Label:Enable(true)
 	end
+
 	if map_icons then
 		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", map_icons, campExists))
 	end
@@ -194,11 +197,11 @@ end
 
 local function SecondsToDays(seconds)
 	local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
-	local num = tonumber(formattedString)
+	local formattedStringToNum = tonumber(formattedString)
 	if formattedString == "0.0" then
 		formattedString = "0.1"
-	elseif num % 1 == 0 then
-		return tostring(num)
+	elseif formattedStringToNum % 1 == 0 then
+		return tostring(formattedStringToNum)
 	end
 	return formattedString
 end
@@ -245,7 +248,7 @@ function BossCalendar:Update()
 				if Calendar_TimeInDays then
 					str = SecondsToDays(self.trackers[Npcs[i]][self.mode]).."d"
 				else
-					str = SecondsToTime(self.trackers[Npcs[i]][self.mode], false)
+					str = SecondsToTime(self.trackers[Npcs[i]][self.mode])
 				end
 			else
 				self[Npcs[i].."img"]:SetTint(1,1,1,1)
@@ -299,27 +302,22 @@ local function GetClosestCamp(pos)
 	return closest
 end
 
-local function LinkWalrus(npc, inst)
-	local igloo_number = GetClosestCamp(inst:GetPosition())
-
-	if igloo_number and igloo_number ~= 1 then
-		return GetTableName(igloo_number)
-	end
-
-	return npc
+local function LinkWalrus(inst)
+	local iglooNumber = GetClosestCamp(inst:GetPosition())
+	return iglooNumber and GetTableName(iglooNumber) or inst.name
 end
 
 local function GetRespawnTime(inst)
-	local respawn_time = 0
+	local respawnTime = 0
 	local name = inst.prefab:upper()
 	if RespawnDurations[inst.prefab] then
-		respawn_time = RespawnDurations[inst.prefab]
+		respawnTime = RespawnDurations[inst.prefab]
 	elseif TUNING[name.."_RESPAWN_TIME"] then
-		respawn_time = TUNING[name.."_RESPAWN_TIME"] 
+		respawnTime = TUNING[name.."_RESPAWN_TIME"] 
 	elseif TUNING[name.."_REGEN_PERIOD"] then
-		respawn_time = TUNING[name.."_REGEN_PERIOD"]
+		respawnTime = TUNING[name.."_REGEN_PERIOD"]
 	end
-	return respawn_time
+	return respawnTime
 end
 
 function BossCalendar:AddKill(npc)
@@ -328,8 +326,8 @@ end
 
 local BSSC_Data = {}
 
-local function trim_json(s)
-	return s:match'^%s*(.*%S)%s*$' or ''
+local function TrimJson(s)
+	return s:match"^%s*(.*%S)%s*$" or ""
 end
 
 local function DataPack(npc, timer, player, camp)
@@ -341,15 +339,16 @@ local function DataPack(npc, timer, player, camp)
 end
 
 local function DataUnpack(str)
-	if str and trim_json(str) ~= "" and ValidJson(str) then
+	if str and TrimJson(str) ~= "" and ValidJson(str) then
 		BSSC_Data = json.decode(str)
+		return true
 	end
+	return
 end
 
 local function NetworkWalrus(tab)
 	if #WalrusCamps == 0 then return end
-	local pos = Vector3(tab.x, tab.y, tab.z)
-	local closest_camp = GetClosestCamp(pos)
+	local closest_camp = GetClosestCamp(Vector3(tab.x, tab.y, tab.z))
 	return GetTableName(closest_camp)
 end
 
@@ -361,19 +360,22 @@ local function ShouldNotify(tab)
 end
 
 function BossCalendar:NetworkBossKilled(data)
-	DataUnpack(data)
+	if not DataUnpack(data) then return end
+	
 	local npc = BSSC_Data["npc"]
-	if not npc then return end
+	
 	if npc:trim() == "MacTusk" then
 		npc = NetworkWalrus(BSSC_Data["camp"])
 		if not npc then return end
 	end
+	
 	if self.trackers[npc] and not self.trackers[npc]["timer"] then
 		self.trackers[npc]["timer"] = BSSC_Data["timer"]
 		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
 		self:Save()
+		
 		local whoKilled = BSSC_Data["player"]
-		if whoKilled and Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
+		if Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
 			self:Say(string.format("%s has just killed %s.", whoKilled, npc), 3)
 		end
 	end
@@ -382,7 +384,6 @@ end
 local _Networking_Say = Networking_Say
 Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
 	if string.sub(message, 1, 6) == "{BSSC}" then
-		print("Npc death received " .. message)
 		if userid ~= ThePlayer.userid then
 			ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
 		end
@@ -395,22 +396,22 @@ function BossCalendar:KilledMonster(npc, inst)
 	if not self.init then return end
 
 	if npc == "MacTusk" then
-		npc = LinkWalrus(npc, inst)
+		npc = LinkWalrus(inst)
 	elseif npc == "Klaus" and WORLD_SPECIAL_EVENT ~= SPECIAL_EVENTS["WINTERS_FEAST"] then
 		self:AddKill(npc)
 		return
 	end
 
 	if not self.trackers[npc]["timer"] then
-		local respawn_time = GetRespawnTime(inst)
-		if respawn_time > 0 then
-			local respawnServerTime = GetServerTime() + respawn_time
-			self.trackers[npc]["timer"] = respawnServerTime
-			ThePlayer.components.timer:StartTimer(npc, respawn_time)
-			local cmd = "{BSSC}" .. DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
-			TheNet:Say(cmd, false, true)
+		local respawnTime = GetRespawnTime(inst)
+		if respawnTime > 0 then
+			local serverRespawnTime = GetServerTime() + respawnTime
+			self.trackers[npc]["timer"] = serverRespawnTime
+			ThePlayer.components.timer:StartTimer(npc, respawnTime)
 			self:AddKill(npc)
 			self:Save()
+			local cmd = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
+			TheNet:Say(cmd, false, true)
 		end
 	end
 end
@@ -471,18 +472,18 @@ function BossCalendar:OnClickNpc(npc)
 			end
 		end
 	else
-		local deaths = 0
+		local amountOfKills = 0
 
 		if npc == "MacTusk" then
-			deaths = self:GetTotalMacTuskKilled()
+			amountOfKills = self:GetTotalMacTuskKilled()
 		else
-			deaths = self.trackers[npc]["deaths"]
+			amountOfKills = self.trackers[npc]["deaths"]
 		end
 
-		if deaths > 1 then
-			say = string.format("I killed %s %d times.", npc, deaths)
-		elseif deaths == 1 then
-			say = string.format("I killed %s.", npc, deaths)
+		if amountOfKills > 1 then
+			say = string.format("I killed %s %d times.", npc, amountOfKills)
+		elseif amountOfKills == 1 then
+			say = string.format("I killed %s.", npc, amountOfKills)
 		else
 			say = string.format("I haven't killed %s yet.", npc)
 		end
@@ -490,11 +491,13 @@ function BossCalendar:OnClickNpc(npc)
 	StatusAnnouncer:Announce(say, npc)
 end
 
-function BossCalendar:HideNpcs(sender)
-	if sender == self.mode then return end
+function BossCalendar:SetMode(mode)
+	if mode == self.mode then return end
 
-	if sender then self.mode = self.mode == "timer" and "deaths" or "timer" end
-
+	if mode then 
+		self.mode = mode
+	end
+	
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
 		self.Klausimg:SetPosition(-135, -55)
@@ -528,7 +531,7 @@ end
 
 function BossCalendar:Close()
 	if self.open then
-		if self.refresh_task then self.refresh_task:Cancel() self.refresh_task = nil end
+		if self.updateTask then self.updateTask:Cancel() self.updateTask = nil end
 		TheFrontEnd:PopScreen(self)
 		self.open = false
 	end
@@ -566,12 +569,12 @@ function BossCalendar:Open()
 	self.title:SetPosition(0,215)
 	self.title:SetString("Boss Calendar")
 
-	self.skull = self.root:AddChild(Image("images/skull.xml", "skull.tex")) -- self.skull = self.root:AddChild(Image("images/hud.xml", "tab_arcane.tex"))
+	self.skull = self.root:AddChild(Image("images/skull.xml", "skull.tex"))
 	self.skull:SetSize(34, 34)
 	self.skull:SetPosition(325, 200)
 	self.skull.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:HideNpcs("deaths")
+			self:SetMode("deaths")
 		end
 	end
 
@@ -580,30 +583,29 @@ function BossCalendar:Open()
 	self.compass:SetPosition(300, 200)
 	self.compass.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:HideNpcs("timer")
+			self:SetMode("timer")
 		end
 	end
 
 	for i = 1, #Npcs do
 		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
-		local npc_img = Npcs[i].."img"
+		local npcImage = Npcs[i].."img"
 		self[Npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
 		self[Npcs[i]]:SetPosition(x, y + 140)
 		self[Npcs[i]]:SetString(Npcs[i])
 
-		self[npc_img] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
-		self[npc_img]:SetSize(68, 68)
-		self[npc_img]:SetPosition(x, y + 95)
-		self[npc_img].OnMouseButton = function(image, button, down) 
+		self[npcImage] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
+		self[npcImage]:SetSize(68, 68)
+		self[npcImage]:SetPosition(x, y + 95)
+		self[npcImage].OnMouseButton = function(image, button, down) 
 			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
 				self:OnClickNpc(Npcs[i])
 			end
 		end
 	end
 
-	self:HideNpcs()
-	self:Update()
-	self.refresh_task = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
+	self:SetMode()
+	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
 	
 	return true
 end
