@@ -38,8 +38,8 @@ local NameToColor = {
 
 local RespawnDurations = {
 	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
-	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME;
-	malbatross = 7200;
+	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
+	malbatross = 7200
 }
 
 function string:trim()
