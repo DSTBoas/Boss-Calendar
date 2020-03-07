@@ -583,15 +583,15 @@ function BossCalendar:Open()
 
 	for i = 1, #Npcs do
 		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
-		local npc_img = Npcs[i].."img"
+		local npcImage = Npcs[i].."img"
 		self[Npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
 		self[Npcs[i]]:SetPosition(x, y + 140)
 		self[Npcs[i]]:SetString(Npcs[i])
 
-		self[npc_img] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
-		self[npc_img]:SetSize(68, 68)
-		self[npc_img]:SetPosition(x, y + 95)
-		self[npc_img].OnMouseButton = function(image, button, down) 
+		self[npcImage] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
+		self[npcImage]:SetSize(68, 68)
+		self[npcImage]:SetPosition(x, y + 95)
+		self[npcImage].OnMouseButton = function(image, button, down) 
 			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
 				self:OnClickNpc(Npcs[i])
 			end
