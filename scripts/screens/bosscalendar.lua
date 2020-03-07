@@ -328,7 +328,7 @@ end
 
 local BSSC_Data = {}
 
-local function trim_json(s)
+local function TrimJson(s)
 	return s:match"^%s*(.*%S)%s*$" or ""
 end
 
@@ -341,7 +341,7 @@ local function DataPack(npc, timer, player, camp)
 end
 
 local function DataUnpack(str)
-	if str and trim_json(str) ~= "" and ValidJson(str) then
+	if str and TrimJson(str) ~= "" and ValidJson(str) then
 		BSSC_Data = json.decode(str)
 		return true
 	end
