@@ -343,7 +343,9 @@ end
 local function DataUnpack(str)
 	if str and trim_json(str) ~= "" and ValidJson(str) then
 		BSSC_Data = json.decode(str)
+		return true
 	end
+	return
 end
 
 local function NetworkWalrus(tab)
@@ -360,16 +362,20 @@ local function ShouldNotify(tab)
 end
 
 function BossCalendar:NetworkBossKilled(data)
-	DataUnpack(data)
+	if not DataUnpack(data) then return end
+	
 	local npc = BSSC_Data["npc"]
+	
 	if npc:trim() == "MacTusk" then
 		npc = NetworkWalrus(BSSC_Data["camp"])
 		if not npc then return end
 	end
+	
 	if self.trackers[npc] and not self.trackers[npc]["timer"] then
 		self.trackers[npc]["timer"] = BSSC_Data["timer"]
 		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
 		self:Save()
+		
 		local whoKilled = BSSC_Data["player"]
 		if Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
 			self:Say(string.format("%s has just killed %s.", whoKilled, npc), 3)
@@ -404,10 +410,10 @@ function BossCalendar:KilledMonster(npc, inst)
 			local respawnServerTime = GetServerTime() + respawn_time
 			self.trackers[npc]["timer"] = respawnServerTime
 			ThePlayer.components.timer:StartTimer(npc, respawn_time)
-			local cmd = "{BSSC}"..DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
-			TheNet:Say(cmd, false, true)
 			self:AddKill(npc)
 			self:Save()
+			local cmd = "{BSSC}"..DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
+			TheNet:Say(cmd, false, true)
 		end
 	end
 end
