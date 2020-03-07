@@ -403,14 +403,15 @@ function BossCalendar:KilledMonster(npc, inst)
 	end
 
 	if not self.trackers[npc]["timer"] then
-		local respawnTime = GetRespawnTime(inst)
-		if respawnTime > 0 then
-			local serverRespawnTime = GetServerTime() + respawnTime
-			self.trackers[npc]["timer"] = serverRespawnTime
-			ThePlayer.components.timer:StartTimer(npc, respawnTime)
+
+		local respawn_time = GetRespawnTime(inst)
+		if respawn_time > 0 then
+			local respawnServerTime = GetServerTime() + respawn_time
+			self.trackers[npc]["timer"] = respawnServerTime
+			ThePlayer.components.timer:StartTimer(npc, respawn_time)
 			self:AddKill(npc)
 			self:Save()
-			local cmd = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
+			local cmd = "{BSSC}"..DataPack(npc, respawnServerTime, ThePlayer.name, CeilVector(inst:GetPosition()))
 			TheNet:Say(cmd, false, true)
 		end
 	end
@@ -493,11 +494,10 @@ end
 
 function BossCalendar:SetMode(mode)
 	if mode == self.mode then return end
-
 	if mode then 
 		self.mode = mode
 	end
-	
+
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
 		self.Klausimg:SetPosition(-135, -55)
