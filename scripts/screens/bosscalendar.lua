@@ -599,7 +599,6 @@ function BossCalendar:Open()
 	end
 
 	self:SwitchToMode()
-	self:Update()
 	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
 	
 	return true
