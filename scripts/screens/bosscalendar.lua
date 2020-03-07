@@ -487,11 +487,11 @@ function BossCalendar:OnClickNpc(npc)
 	StatusAnnouncer:Announce(say, npc)
 end
 
-function BossCalendar:SwitchToMode(sender)
-	if sender == self.mode then return end
-
-	if sender then self.mode = self.mode == "timer" and "deaths" or "timer" end
-
+function BossCalendar:SetMode(mode)
+	if mode == self.mode then return end
+	
+	self.mode = mode
+	
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
 		self.Klausimg:SetPosition(-135, -55)
@@ -568,7 +568,7 @@ function BossCalendar:Open()
 	self.skull:SetPosition(325, 200)
 	self.skull.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:SwitchToMode("deaths")
+			self:SetMode("deaths")
 		end
 	end
 
@@ -577,7 +577,7 @@ function BossCalendar:Open()
 	self.compass:SetPosition(300, 200)
 	self.compass.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:SwitchToMode("timer")
+			self:SetMode("timer")
 		end
 	end
 
@@ -598,7 +598,7 @@ function BossCalendar:Open()
 		end
 	end
 
-	self:SwitchToMode()
+	self:SetMode()
 	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
 	
 	return true
