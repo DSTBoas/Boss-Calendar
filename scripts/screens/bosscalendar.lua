@@ -43,7 +43,7 @@ local RespawnDurations = {
 }
 
 function string:trim()
-	return self:gsub("%sI+%a","")
+	return self:gsub("%sI+%a", "")
 end
 
 local function GetServerTime()
@@ -194,11 +194,11 @@ end
 
 local function SecondsToDays(seconds)
 	local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
-	local num = tonumber(formattedString)
+	local formattedStringToNum = tonumber(formattedString)
 	if formattedString == "0.0" then
 		formattedString = "0.1"
-	elseif num % 1 == 0 then
-		return tostring(num)
+	elseif formattedStringToNum % 1 == 0 then
+		return tostring(formattedStringToNum)
 	end
 	return formattedString
 end
@@ -310,16 +310,16 @@ local function LinkWalrus(npc, inst)
 end
 
 local function GetRespawnTime(inst)
-	local respawn_time = 0
+	local respawnTime = 0
 	local name = inst.prefab:upper()
 	if RespawnDurations[inst.prefab] then
-		respawn_time = RespawnDurations[inst.prefab]
+		respawnTime = RespawnDurations[inst.prefab]
 	elseif TUNING[name.."_RESPAWN_TIME"] then
-		respawn_time = TUNING[name.."_RESPAWN_TIME"] 
+		respawnTime = TUNING[name.."_RESPAWN_TIME"] 
 	elseif TUNING[name.."_REGEN_PERIOD"] then
-		respawn_time = TUNING[name.."_REGEN_PERIOD"]
+		respawnTime = TUNING[name.."_REGEN_PERIOD"]
 	end
-	return respawn_time
+	return respawnTime
 end
 
 function BossCalendar:AddKill(npc)
@@ -329,7 +329,7 @@ end
 local BSSC_Data = {}
 
 local function trim_json(s)
-	return s:match'^%s*(.*%S)%s*$' or ''
+	return s:match"^%s*(.*%S)%s*$" or ""
 end
 
 local function DataPack(npc, timer, player, camp)
@@ -348,8 +348,7 @@ end
 
 local function NetworkWalrus(tab)
 	if #WalrusCamps == 0 then return end
-	local pos = Vector3(tab.x, tab.y, tab.z)
-	local closest_camp = GetClosestCamp(pos)
+	local closest_camp = GetClosestCamp(Vector3(tab.x, tab.y, tab.z))
 	return GetTableName(closest_camp)
 end
 
@@ -363,7 +362,6 @@ end
 function BossCalendar:NetworkBossKilled(data)
 	DataUnpack(data)
 	local npc = BSSC_Data["npc"]
-	if not npc then return end
 	if npc:trim() == "MacTusk" then
 		npc = NetworkWalrus(BSSC_Data["camp"])
 		if not npc then return end
@@ -373,7 +371,7 @@ function BossCalendar:NetworkBossKilled(data)
 		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
 		self:Save()
 		local whoKilled = BSSC_Data["player"]
-		if whoKilled and Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
+		if Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
 			self:Say(string.format("%s has just killed %s.", whoKilled, npc), 3)
 		end
 	end
@@ -382,7 +380,6 @@ end
 local _Networking_Say = Networking_Say
 Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
 	if string.sub(message, 1, 6) == "{BSSC}" then
-		print("Npc death received " .. message)
 		if userid ~= ThePlayer.userid then
 			ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
 		end
@@ -490,7 +487,7 @@ function BossCalendar:OnClickNpc(npc)
 	StatusAnnouncer:Announce(say, npc)
 end
 
-function BossCalendar:HideNpcs(sender)
+function BossCalendar:SwitchToMode(sender)
 	if sender == self.mode then return end
 
 	if sender then self.mode = self.mode == "timer" and "deaths" or "timer" end
@@ -528,7 +525,7 @@ end
 
 function BossCalendar:Close()
 	if self.open then
-		if self.refresh_task then self.refresh_task:Cancel() self.refresh_task = nil end
+		if self.updateTask then self.updateTask:Cancel() self.updateTask = nil end
 		TheFrontEnd:PopScreen(self)
 		self.open = false
 	end
@@ -571,7 +568,7 @@ function BossCalendar:Open()
 	self.skull:SetPosition(325, 200)
 	self.skull.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:HideNpcs("deaths")
+			self:SwitchToMode("deaths")
 		end
 	end
 
@@ -580,7 +577,7 @@ function BossCalendar:Open()
 	self.compass:SetPosition(300, 200)
 	self.compass.OnMouseButton = function(image, button, down)
 		if button == 1000 and down then
-			self:HideNpcs("timer")
+			self:SwitchToMode("timer")
 		end
 	end
 
@@ -601,9 +598,9 @@ function BossCalendar:Open()
 		end
 	end
 
-	self:HideNpcs()
+	self:SwitchToMode()
 	self:Update()
-	self.refresh_task = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
+	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
 	
 	return true
 end
