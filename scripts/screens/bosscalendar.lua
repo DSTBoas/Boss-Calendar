@@ -180,13 +180,13 @@ function BossCalendar:LoadTimers()
 end
 
 
-function BossCalendar:Init(reminder_color, reminder_duration, calendar_indays, announce_style, announce_indays, network_notifications)
-	Announce_Style = announce_style
-	Announce_TimeInDays = announce_indays
-	Calendar_TimeInDays = calendar_indays
-	Reminder_Color = NameToColor[reminder_color]
-	Reminder_Duration = reminder_duration
-	Network_Notifications = network_notifications
+function BossCalendar:Init(reminderColor, reminderDuration, calendarIndays, announceStyle, announceIndays, networkNotifications)
+	Announce_Style = announceStyle
+	Announce_TimeInDays = announceIndays
+	Calendar_TimeInDays = calendarIndays
+	Reminder_Color = NameToColor[reminderColor]
+	Reminder_Duration = reminderDuration
+	Network_Notifications = networkNotifications
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
 	ThePlayer:ListenForEvent("timerdone", OnTimerDone)
@@ -491,9 +491,7 @@ end
 function BossCalendar:SetMode(mode)
 	if mode == self.mode then return end
 
-	if mode then 
-		self.mode = mode
-	end
+	self.mode = mode
 	
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
@@ -601,7 +599,7 @@ function BossCalendar:Open()
 		end
 	end
 
-	self:SetMode()
+	self:SetMode(self.mode)
 	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
 	
 	return true
