@@ -94,9 +94,9 @@ end
 configuration_options = 
 {
 	AddSectionTitle("Keybinds"),
-	AddConfig("Key to open", "OPENKEY", keyslist, 118, "Assign a key"),
+	AddConfig("Open key", "OPEN_KEY", keyslist, 118, "Assign a key"),
 	AddSectionTitle("Settings"),
-	AddConfig("Open mode", "TOGGLEMODE", bool, true, "Toggle / Hold"),
+	AddConfig("Open mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
 	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
 	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Short / Default / Long"),

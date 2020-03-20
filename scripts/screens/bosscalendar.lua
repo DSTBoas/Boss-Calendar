@@ -9,8 +9,18 @@ local ValidJson = require "validJson"
 
 local DataContainer = PersistentData("BossCalendar")
 local WalrusCamps = {}
-local Npcs = {"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", "Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", "MacTusk IV", "Klaus"}
-local Session, Sayfn, Reminder_Color, Reminder_Duration, Calendar_TimeInDays, Announce_Style, Announce_TimeInDays, Network_Notifications
+local Settings = {}
+local RespawnDurations = {
+	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
+	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
+	malbatross = 7200
+}
+local Npcs = {	
+	"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", 
+	"Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", 
+	"MacTusk IV", "Klaus"
+}
+local Session, Sayfn
 local BossCalendar = Class(Screen)
 
 local function RGB(r, g, b)
@@ -36,25 +46,68 @@ local NameToColor = {
 	Pink				= RGB(255, 192, 203)
 }
 
-local RespawnDurations = {
-	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
-	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
-	malbatross = 7200
-}
-
-function string:trim()
-	return self:gsub("%sI+%a", "")
-end
+---
+--- Helper functions
+---
 
 local function GetServerTime()
 	return (TheWorld.state.cycles + TheWorld.state.time) * TUNING.TOTAL_DAY_TIME
 end
 
+local function SecondsToDays(seconds)
+	local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
+	local formattedStringToNum = tonumber(formattedString)
+
+	if formattedString == "0.0" then
+		formattedString = "0.1"
+	elseif formattedStringToNum % 1 == 0 then
+		formattedString = tostring(formattedStringToNum)
+	end
+
+	return formattedString
+end
+
+local function SecondsToTime(seconds, announce)
+	seconds = seconds - GetServerTime()
+
+	local hours = math.floor(seconds / 3600)
+	local minutes = math.floor(seconds % 3600 / 60)
+	local str = ""
+
+	if hours > 0 then
+		local hours_str = not announce and "h" or hours == 1 and " hour" or " hours"
+		str = hours..hours_str
+	end
+
+	if minutes > 0 then
+		str = str == "" and str or str.." "
+		local minutes_str = not announce and "m" or minutes == 1 and " minute" or " minutes"
+		str = str..minutes..minutes_str
+	end
+
+	if hours < 1 and minutes < 1 then
+		local seconds_str = not announce and "s" or seconds == 1 and " second" or " seconds"
+		return math.ceil(seconds)..seconds_str
+	end
+
+	return str
+end
+
+function string:trim()
+	return self:gsub("%sI+%a", "")
+end
+
+---
+--- Reminder functions
+---
+
 function BossCalendar:Say(message, time)
-	if self.talking then return end
+	if self.talking then 
+		return 
+	end
 	self.talking = true
 	ThePlayer.components.talker.lineduration = time
-	ThePlayer.components.talker:Say(message, time, 0, true, false, Reminder_Color)
+	ThePlayer.components.talker:Say(message, time, 0, true, false, Settings.ReminderColor)
 	ThePlayer.components.talker.Say = function() end
 	ThePlayer:DoTaskInTime(time, function()
 		ThePlayer.components.talker.lineduration = 2.5
@@ -67,12 +120,21 @@ local function OnTimerDone(inst, data)
 	local npc = data.name
 	BossCalendar.trackers[npc].timer = nil
 	BossCalendar:Save()
-	if npc:trim() == "MacTusk" and not TheWorld.state.iswinter then return end 
-	BossCalendar:Say(string.format("%s has just respawned.", npc), Reminder_Duration)
+
+	if npc:trim() == "MacTusk" and not TheWorld.state.iswinter then 
+		return 
+	end 
+
+	BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.ReminderDuration)
 end
+
+---
+--- Map icons / igloo functions
+---
 
 function BossCalendar:AddMapIcons(widget, icon)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
+
 	for i = 1, #WalrusCamps do
 		widget.camp_icons:AddMapIcon("images/"..icon..".xml", icon.."_"..i..".tex", WalrusCamps[i])
 	end
@@ -80,9 +142,11 @@ end
 
 local function SaveCampPositions()
 	local camps = {}
+
 	for i = 1, #WalrusCamps do
 		camps[i] = Vector3(WalrusCamps[i].x, WalrusCamps[i].y, WalrusCamps[i].z)
 	end
+
 	DataContainer:SetValue("igloos_"..tostring(TheWorld.meta.seed), camps)
 	DataContainer:Save()
 end
@@ -94,7 +158,7 @@ local function CeilVector(pos)
 	return pos
 end
 
-local function Walrus_CampPositionExists(pos)
+local function GetCampNumber(pos)
 	for i = 1, #WalrusCamps do
 		if WalrusCamps[i]:__eq(pos) then
 			return i
@@ -106,37 +170,35 @@ end
 local function InsertCamp(pos)
 	table.insert(WalrusCamps, pos)
 	SaveCampPositions()
-	return Walrus_CampPositionExists(pos)
+	return GetCampNumber(pos)
 end
 
 function BossCalendar:AddCamp(inst, map_icons, iglo_numbering)
 	local ceilVector = CeilVector(inst:GetPosition())
-	local campExists = Walrus_CampPositionExists(ceilVector) or InsertCamp(ceilVector)
+	local campNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
 
 	if iglo_numbering then
 		inst.entity:AddLabel()
 		inst.Label:SetFont(CHATFONT_OUTLINE)
 		inst.Label:SetFontSize(35)
 		inst.Label:SetWorldOffset(0, 5, 0)
-		inst.Label:SetText(campExists)
+		inst.Label:SetText(campNumber)
 		inst.Label:Enable(true)
 	end
 
 	if map_icons then
-		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", map_icons, campExists))
+		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", map_icons, campNumber))
 	end
 end
 
-function BossCalendar:Save()
-	DataContainer:SetValue(Session.."_data", self.trackers)
-	DataContainer:Save()
-	self:Update()
-end
+--
+-- Initialisation functions
+--
 
 function BossCalendar:LoadIgloos()
 	DataContainer:Load()
 	local camps = DataContainer:GetValue(tostring("igloos_"..TheWorld.meta.seed))
-	 if camps then
+	if camps then
 		for i = 1, #camps do
 			WalrusCamps[i] = Vector3(camps[i].x, camps[i].y, camps[i].z)
 		end
@@ -179,98 +241,100 @@ function BossCalendar:LoadTimers()
 	self.init = true
 end
 
+function BossCalendar:Init(settings)
+	Settings = settings
+	Settings.AnnounceStyle = BossCalendar["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")]
 
-function BossCalendar:Init(reminderColor, reminderDuration, calendarIndays, announceStyle, announceIndays, networkNotifications)
-	Announce_Style = announceStyle
-	Announce_TimeInDays = announceIndays
-	Calendar_TimeInDays = calendarIndays
-	Reminder_Color = NameToColor[reminderColor]
-	Reminder_Duration = reminderDuration
-	Network_Notifications = networkNotifications
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
 	ThePlayer:ListenForEvent("timerdone", OnTimerDone)
+
 	self.mode = "timer"
 	self.talking = false
 	self:LoadTimers()
 end
 
-local function SecondsToDays(seconds)
-	local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
-	local formattedStringToNum = tonumber(formattedString)
-	if formattedString == "0.0" then
-		formattedString = "0.1"
-	elseif formattedStringToNum % 1 == 0 then
-		return tostring(formattedStringToNum)
-	end
-	return formattedString
+---
+--- Networking functions 
+---
+
+local NetworkData = {}
+
+local function DataPack(npc, timer, player, camp)
+	NetworkData["npc"] = npc
+	NetworkData["timer"] = timer
+	NetworkData["player"] = player
+	NetworkData["camp"] = camp
+	return json.encode(NetworkData)
 end
 
-local function SecondsToTime(seconds, announce)
-	seconds = seconds - GetServerTime()
-	local hours = math.floor(seconds / 3600)
-	local minutes = math.floor(seconds % 3600 / 60)
-	local str = ""
-	if hours > 0 then
-		local hours_str = not announce and "h" or hours == 1 and " hour" or " hours"
-		str = hours..hours_str
+local function DataUnpack(data)
+	if ValidJson(data) then
+		NetworkData = json.decode(data)
+		return (NetworkData["npc"] and NetworkData["timer"] and NetworkData["player"] and NetworkData["camp"])
 	end
-	if minutes > 0 then
-		str = str == "" and str or str.." "
-		local minutes_str = not announce and "m" or minutes == 1 and " minute" or " minutes"
-		str = str..minutes..minutes_str
-	end
-	if hours < 1 and minutes < 1 then
-		local seconds_str = not announce and "s" or seconds == 1 and " second" or " seconds"
-		return math.ceil(seconds)..seconds_str
-	end
-	return str
+	return
 end
 
-function BossCalendar:GetTotalMacTuskKilled()
-	local t = 0
-	for i = 1, #Npcs do
-		if Npcs[i]:trim() == "MacTusk" then
-			t = t + self.trackers[Npcs[i]]["deaths"]
+local function NetworkWalrus(campPosition)
+	if #WalrusCamps == 0 then 
+		return 
+	end
+
+	local closest_camp = GetClosestCamp(Vector3(campPosition.x, campPosition.y, campPosition.z))
+
+	return GetTableName(closest_camp)
+end
+
+local function ShouldNotify(campPosition)
+	local pos = Vector3(campPosition.x, campPosition.y, campPosition.z)
+	local playerVector = Vector3(ThePlayer.Transform:GetWorldPosition())
+	return pos:Dist(playerVector) > 30
+end
+
+function BossCalendar:NetworkBossKilled(data)
+	if not DataUnpack(data) then 
+		return 
+	end
+	
+	local npc = NetworkData["npc"]
+	if not npc then 
+		return 
+	end
+
+	if npc:trim() == "MacTusk" then
+		npc = NetworkWalrus(NetworkData["camp"])
+		if not npc then 
+			return 
 		end
 	end
-	return t
-end
-
-function BossCalendar:Update()
-	if not self.open or not self.init then return end
-	for i = 1, #Npcs do
-		local str = ""
-		if self.trackers[Npcs[i]][self.mode] then
-			if self.mode == "timer" then
-				self[Npcs[i].."img"]:SetTint(0,0,0,1)
-				self[Npcs[i]]:SetColour(1,0,0,1)
-				if Calendar_TimeInDays then
-					str = SecondsToDays(self.trackers[Npcs[i]][self.mode]).."d"
-				else
-					str = SecondsToTime(self.trackers[Npcs[i]][self.mode])
-				end
-			else
-				self[Npcs[i].."img"]:SetTint(1,1,1,1)
-				self[Npcs[i]]:SetColour(1,1,1,1)
-				if Npcs[i] == "MacTusk" then
-					str = "Killed: "..self:GetTotalMacTuskKilled()
-				else
-					str = "Killed: "..self.trackers[Npcs[i]][self.mode]
-				end
-			end
-		else
-			self[Npcs[i].."img"]:SetTint(1,1,1,1)
-			self[Npcs[i]]:SetColour(1,1,1,1)
-			if self.mode == "timer" then
-				str = Npcs[i]
-			else
-				str = "Killed: 0"
-			end
+	
+	if self.trackers[npc] and not self.trackers[npc]["timer"] then
+		self.trackers[npc]["timer"] = NetworkData["timer"]
+		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
+		self:Save()
+		
+		local doer = NetworkData["player"]
+		if Settings.NetworkNotifications and ShouldNotify(NetworkData["camp"]) then
+			self:Say(string.format("%s has just killed %s.", doer, npc), 3)
 		end
-		self[Npcs[i]]:SetString(str)
 	end
 end
+
+local _Networking_Say = Networking_Say
+Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
+	if string.sub(message, 1, 6) == "{BSSC}" then
+		if userid ~= ThePlayer.userid then
+			ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
+		end
+	else
+		_Networking_Say(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
+	end
+end
+
+--
+-- logic
+--
 
 local function GetTableName(walrus)
 	local c = 1
@@ -308,89 +372,33 @@ local function LinkWalrus(inst)
 end
 
 local function GetRespawnTime(inst)
-	local respawnTime = 0
-	local name = inst.prefab:upper()
+	local respawnTime, instName = 0, inst.prefab:upper()
+
 	if RespawnDurations[inst.prefab] then
 		respawnTime = RespawnDurations[inst.prefab]
-	elseif TUNING[name.."_RESPAWN_TIME"] then
-		respawnTime = TUNING[name.."_RESPAWN_TIME"] 
-	elseif TUNING[name.."_REGEN_PERIOD"] then
-		respawnTime = TUNING[name.."_REGEN_PERIOD"]
+	elseif TUNING[instName.."_RESPAWN_TIME"] then
+		respawnTime = TUNING[instName.."_RESPAWN_TIME"] 
+	elseif TUNING[instName.."_REGEN_PERIOD"] then
+		respawnTime = TUNING[instName.."_REGEN_PERIOD"]
 	end
+
 	return respawnTime
+end
+
+function BossCalendar:Save()
+	DataContainer:SetValue(Session.."_data", self.trackers)
+	DataContainer:Save()
+	self:Update()
 end
 
 function BossCalendar:AddKill(npc)
 	self.trackers[npc]["deaths"] = self.trackers[npc]["deaths"] + 1
 end
 
-local BSSC_Data = {}
-
-local function DataPack(npc, timer, player, camp)
-	BSSC_Data["npc"] = npc
-	BSSC_Data["timer"] = timer
-	BSSC_Data["player"] = player
-	BSSC_Data["camp"] = camp
-	return json.encode(BSSC_Data)
-end
-
-local function DataUnpack(str)
-	if ValidJson(str) then
-		BSSC_Data = json.decode(str)
-		return true
-	end
-	return
-end
-
-local function NetworkWalrus(tab)
-	if #WalrusCamps == 0 then return end
-	local closest_camp = GetClosestCamp(Vector3(tab.x, tab.y, tab.z))
-	return GetTableName(closest_camp)
-end
-
-local function ShouldNotify(tab)
-	local pos = Vector3(tab.x, tab.y, tab.z)
-	local playerVector = Vector3(ThePlayer.Transform:GetWorldPosition())
-	local dist = pos:Dist(playerVector)
-	return dist > 30
-end
-
-function BossCalendar:NetworkBossKilled(data)
-	if not DataUnpack(data) then return end
-	
-	local npc = BSSC_Data["npc"]
-	if not npc then return end
-
-	if npc:trim() == "MacTusk" then
-		npc = NetworkWalrus(BSSC_Data["camp"])
-		if not npc then return end
-	end
-	
-	if self.trackers[npc] and not self.trackers[npc]["timer"] then
-		self.trackers[npc]["timer"] = BSSC_Data["timer"]
-		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
-		self:Save()
-		
-		local whoKilled = BSSC_Data["player"]
-		if Network_Notifications and ShouldNotify(BSSC_Data["camp"]) then
-			self:Say(string.format("%s has just killed %s.", whoKilled, npc), 3)
-		end
-	end
-end
-
-local _Networking_Say = Networking_Say
-Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
-	if string.sub(message, 1, 6) == "{BSSC}" then
-		if userid ~= ThePlayer.userid then
-			ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
-		end
-	else
-		_Networking_Say(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
-	end
-end
-
 function BossCalendar:KilledMonster(npc, inst)
-	if not self.init then return end
+	if not self.init then 
+		return 
+	end
 
 	if npc == "MacTusk" then
 		npc = LinkWalrus(inst)
@@ -401,6 +409,7 @@ function BossCalendar:KilledMonster(npc, inst)
 
 	if not self.trackers[npc]["timer"] then
 		local respawnTime = GetRespawnTime(inst)
+
 		if respawnTime > 0 then
 			local serverRespawnTime = GetServerTime() + respawnTime
 			self.trackers[npc]["timer"] = serverRespawnTime
@@ -413,6 +422,10 @@ function BossCalendar:KilledMonster(npc, inst)
 	end
 end
 
+---
+--- Announce functions
+---
+
 local NpcToObject = {
 	["Bee Queen"] = "Gigantic Beehive",
 	MacTusk = "Walrus Camp",
@@ -420,77 +433,140 @@ local NpcToObject = {
 }
 
 local function IsNearby(npc)
-	if NpcToObject[npc] then npc = NpcToObject[npc] end
+	if NpcToObject[npc] then 
+		npc = NpcToObject[npc]
+	end
+
 	local x, y, z = ThePlayer.Transform:GetWorldPosition()
 	local ents = TheSim:FindEntities(x, y, z, 30, 0, 
 		{"lava", "tree", "FX", "NOCLICK", "DECOR", "INLIMBO", "burnt", "boulder", "structure"}, 
 		{"stargate", "epic", "blocker", "antlion_sinkhole_blocker"}
 	)
+
 	for i = 1, #ents do
 		if ents[i].name == npc then
-			if ents[i].prefab == "toadstool_cap" and not ents[i].AnimState:IsCurrentAnimation("mushroom_toad_idle_loop") then return end
+			if ents[i].prefab == "toadstool_cap" then 
+				return ents[i].AnimState:IsCurrentAnimation("mushroom_toad_idle_loop")
+			end
 			return true
 		end
 	end
+
 	return
 end
 
-function BossCalendar:OnClickNpc(npc)
-	local say = ""
+function BossCalendar:OnAnnounce(npc)
+	local announcement = ""
+	
 	if self.mode == "timer" then
 		if self.trackers[npc]["timer"] then
-			if Announce_TimeInDays then
-				if Announce_Style == 1 then
-					local respawnDay = math.floor(self.trackers[npc]["timer"] / TUNING.TOTAL_DAY_TIME)
-					respawnDay = respawnDay + 1
-					say = string.format("%s respawns on day %d.", npc, respawnDay)
-				else
-					local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
-					local plural = tonumber(respawnDay) > 1 and "days" or "day"
-					if Announce_Style == 2 then
-						if tonumber(respawnDay) <= 1 then
-							say = string.format("%s respawns today.", npc)
-						else
-							say = string.format("%s respawns in %d %s.", npc, respawnDay, plural)
-						end
-					else
-						say = string.format("%s respawns in %s %s.", npc, respawnDay, plural)
-					end
-				end
-			else
-				local respawnDay = SecondsToTime(self.trackers[npc]["timer"], true)
-				say = string.format("%s respawns in %s.", npc, respawnDay)
-			end
+			announcement = Settings.AnnounceStyle(self, npc)
 		else
-			if IsNearby(npc:trim()) then
-				say = string.format("I am at %s.", npc)
-			else
-				say = string.format("Let's kill %s.", npc)
-			end
+			announcement = self:AnnounceToKill(npc)
 		end
-	else
-		local amountOfKills = 0
+	elseif self.mode == "deaths" then
+		announcement = self:AnnounceDeaths(npc)
+	end	
 
-		if npc == "MacTusk" then
-			amountOfKills = self:GetTotalMacTuskKilled()
-		else
-			amountOfKills = self.trackers[npc]["deaths"]
-		end
+	StatusAnnouncer:Announce(announcement, npc)
+end
 
-		if amountOfKills > 1 then
-			say = string.format("I killed %s %d times.", npc, amountOfKills)
-		elseif amountOfKills == 1 then
-			say = string.format("I killed %s.", npc, amountOfKills)
-		else
-			say = string.format("I haven't killed %s yet.", npc)
+function BossCalendar:AnnounceToKill(npc)
+	return 	IsNearby(npc:trim()) and string.format("I am at %s.", npc) or
+			string.format("Let's kill %s.", npc)
+end
+
+function BossCalendar:GetTotalMacTuskKilled()
+	local t = 0
+
+	for i = 1, #Npcs do
+		if Npcs[i]:trim() == "MacTusk" then
+			t = t + self.trackers[Npcs[i]]["deaths"]
 		end
 	end
-	StatusAnnouncer:Announce(say, npc)
+
+	return t
+end
+
+function BossCalendar:AnnounceDeaths(npc)
+	local amountOfKills = 0
+
+	if npc == "MacTusk" then
+		amountOfKills = self:GetTotalMacTuskKilled()
+	else
+		amountOfKills = self.trackers[npc]["deaths"]
+	end
+
+	return 	amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
+			amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
+			string.format("I haven't killed %s yet.", npc)
+end
+
+function BossCalendar:Announce1(npc)
+	local respawnDay = math.floor(self.trackers[npc]["timer"] / TUNING.TOTAL_DAY_TIME)
+	respawnDay = respawnDay + 1
+
+	return string.format("%s respawns on day %d.", npc, respawnDay)
+end
+
+function BossCalendar:Announce2(npc)
+	local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
+	local plural = tonumber(respawnDay) > 1 and "days" or "day"
+
+	return 	tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc) or 
+			string.format("%s respawns in %d %s.", npc, respawnDay, plural)
+end
+
+function BossCalendar:Announce2_5(npc)
+	local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
+	respawnDay = respawnDay..(tonumber(respawnDay) > 1 and " days" or " day")
+
+	return string.format("%s respawns in %s.", npc, respawnDay)
+end
+
+---
+--- GUI functions
+---
+
+function BossCalendar:Update()
+	if not self.open or not self.init then 
+		return 
+	end
+
+	for i = 1, #Npcs do
+		local str = ""
+		if self.trackers[Npcs[i]][self.mode] then
+			if self.mode == "timer" then
+				self[Npcs[i].."img"]:SetTint(0,0,0,1)
+				self[Npcs[i]]:SetColour(1,0,0,1)
+				if Settings.CalendarUnits then
+					str = SecondsToDays(self.trackers[Npcs[i]][self.mode]).."d"
+				else
+					str = SecondsToTime(self.trackers[Npcs[i]][self.mode])
+				end
+			else
+				self[Npcs[i].."img"]:SetTint(1,1,1,1)
+				self[Npcs[i]]:SetColour(1,1,1,1)
+				if Npcs[i] == "MacTusk" then
+					str = "Killed: "..self:GetTotalMacTuskKilled()
+				else
+					str = "Killed: "..self.trackers[Npcs[i]][self.mode]
+				end
+			end
+		else
+			self[Npcs[i].."img"]:SetTint(1,1,1,1)
+			self[Npcs[i]]:SetColour(1,1,1,1)
+			if self.mode == "timer" then
+				str = Npcs[i]
+			else
+				str = "Killed: 0"
+			end
+		end
+		self[Npcs[i]]:SetString(str)
+	end
 end
 
 function BossCalendar:SetMode(mode)
-	if mode == self.mode then return end
-
 	self.mode = mode
 	
 	if self.mode == "deaths" then
@@ -526,14 +602,20 @@ end
 
 function BossCalendar:Close()
 	if self.open then
-		if self.updateTask then self.updateTask:Cancel() self.updateTask = nil end
+
+		if self.updateTask then self.updateTask:Cancel()
+			self.updateTask = nil 
+		end
+
 		TheFrontEnd:PopScreen(self)
 		self.open = false
 	end
 end
 
 function BossCalendar:Open()
-	if self.open or not self.init then return end
+	if self.open or not self.init then 
+		return 
+	end
 
 	Screen._ctor(self, "Boss Calendar")
 	self.open = true
@@ -555,7 +637,7 @@ function BossCalendar:Open()
 	self.root:SetVAnchor(ANCHOR_MIDDLE)
 
 	if self.bg then self.bg:Kill() end
-	self.bg = self.root:AddChild(Image( "images/scoreboard.xml", "scoreboard_frame.tex" ))
+	self.bg = self.root:AddChild(Image( "images/scoreboard.xml", "scoreboard_frame.tex"))
 	self.bg:SetScale(.96,.9)
 
 	if self.title then self.title:Kill() end
@@ -594,7 +676,7 @@ function BossCalendar:Open()
 		self[npcImage]:SetPosition(x, y + 95)
 		self[npcImage].OnMouseButton = function(image, button, down) 
 			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
-				self:OnClickNpc(Npcs[i])
+				self:OnAnnounce(Npcs[i])
 			end
 		end
 	end

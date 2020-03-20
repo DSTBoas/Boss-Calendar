@@ -1,14 +1,9 @@
-local OPENKEY = GetModConfigData("OPENKEY")
-local REMINDER_COLOR = GetModConfigData("REMINDER_COLOR")
-local REMINDER_DURATION = GetModConfigData("REMINDER_DURATION")
-local CALENDAR_UNITS = GetModConfigData("CALENDAR_UNITS")
-local ANNOUNCE_STYLE = GetModConfigData("ANNOUNCE_STYLES")
-local ANNOUNCE_UNITS = GetModConfigData("ANNOUNCE_UNITS")
-local NETWORK_NOTIFICATIONS = GetModConfigData("NETWORK_NOTIFICATIONS")
-local TOGGLEMODE = GetModConfigData("TOGGLEMODE")
+local OPEN_KEY = GetModConfigData("OPEN_KEY")
+local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
 local IGLO_ICON = GetModConfigData("IGLO_ICON_SIZE")
 local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
+
 local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
 local Prefabs = {
@@ -66,7 +61,7 @@ end)
 local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
 	local ents = TheSim:FindEntities(x, y, z, 15, 0, 0, {"epic", "walrus"})
-	return #ents > 0 and ents[1]
+	return ents[1]
 end
 
 local function ValidateDeath(inst)
@@ -100,7 +95,7 @@ local function Display()
 	if CanToggle() then
 		if BossCalendar:Open() then 
 			TheFrontEnd:PushScreen(BossCalendar)
-		elseif TOGGLEMODE then
+		elseif TOGGLE_MODE then
 			BossCalendar:Close()
 		end
 	end
@@ -112,20 +107,29 @@ local function Close()
 	end
 end
 
-if OPENKEY then
-	if TOGGLEMODE then
-		TheInput:AddKeyUpHandler(OPENKEY, Display)
+if OPEN_KEY then
+	if TOGGLE_MODE then
+		TheInput:AddKeyUpHandler(OPEN_KEY, Display)
 	else
-		TheInput:AddKeyDownHandler(OPENKEY, Display)
-		TheInput:AddKeyUpHandler(OPENKEY, Close)
+		TheInput:AddKeyDownHandler(OPEN_KEY, Display)
+		TheInput:AddKeyUpHandler(OPEN_KEY, Close)
 	end
 end
 
 local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
-		if inst == GLOBAL.ThePlayer then
-			BossCalendar:Init(REMINDER_COLOR, REMINDER_DURATION, CALENDAR_UNITS, ANNOUNCE_STYLE, ANNOUNCE_UNITS, NETWORK_NOTIFICATIONS)
-		end
+		if inst ~= GLOBAL.ThePlayer then return end
+
+		local settings = {
+			ReminderColor = GetModConfigData("REMINDER_COLOR"),
+			ReminderDuration = GetModConfigData("REMINDER_DURATION"),
+			CalendarUnits = GetModConfigData("CALENDAR_UNITS"),
+			AnnounceStyle = GetModConfigData("ANNOUNCE_STYLES"),
+			AnnounceUnits = GetModConfigData("ANNOUNCE_UNITS"),
+			NetworkNotifications = GetModConfigData("NETWORK_NOTIFICATIONS")
+		} 
+
+		BossCalendar:Init(settings)
 	end)
 end
 AddPlayerPostInit(ModInit)
