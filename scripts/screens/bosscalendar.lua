@@ -489,13 +489,7 @@ function BossCalendar:GetTotalMacTuskKilled()
 end
 
 function BossCalendar:AnnounceDeaths(npc)
-	local amountOfKills = 0
-
-	if npc == "MacTusk" then
-		amountOfKills = self:GetTotalMacTuskKilled()
-	else
-		amountOfKills = self.trackers[npc]["deaths"]
-	end
+	local amountOfKills = npc == "MacTusk" and self:GetTotalMacTuskKilled() or self.trackers[npc]["deaths"]
 
 	return 	amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
 			amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
