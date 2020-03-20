@@ -118,7 +118,9 @@ end
 
 local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
-		if inst ~= GLOBAL.ThePlayer then return end
+		if inst ~= GLOBAL.ThePlayer then 
+			return 
+		end
 
 		local settings = {
 			ReminderColor = GetModConfigData("REMINDER_COLOR"),
