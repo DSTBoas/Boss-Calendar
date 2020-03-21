@@ -10,12 +10,14 @@ local ValidJson = require "validJson"
 local DataContainer = PersistentData("BossCalendar")
 local WalrusCamps = {}
 local Settings = {}
-local RespawnDurations = {
+local RespawnDurations = 
+{
 	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
 	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
 	malbatross = 7200
 }
-local Npcs = {	
+local Npcs = 
+{	
 	"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", 
 	"Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", 
 	"MacTusk IV", "Klaus"
@@ -27,7 +29,8 @@ local function RGB(r, g, b)
 	return {r / 255, g / 255, b / 255, 1}
 end
 
-local NameToColor = {
+local ColorLookup = 
+{
 	White				= RGB(255, 255 ,255),
 	Red 				= RGB(255, 0, 0),
 	Green				= RGB(0, 255, 0),
@@ -243,11 +246,8 @@ end
 
 function BossCalendar:Init(settings)
 	Settings = settings
-	if Settings.AnnounceUnits then
-		Settings.AnnounceStyle = self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")]
-	else
-		Settings.AnnounceStyle = self.AnnounceTime
-	end
+	Settings.ReminderColor = ColorLookup[Settings.ReminderColor]
+	Settings.AnnounceStyle = Settings.AnnounceUnits and self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")] or Settings.AnnounceStyle = self.AnnounceTime
 
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")

@@ -6,7 +6,8 @@ local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 
 local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
-local Prefabs = {
+local Prefabs = 
+{
 	yellowgem = {
 		npc = "Dragonfly",
 		death_anim = {"death"}
@@ -37,7 +38,8 @@ local Prefabs = {
 	}
 }
 
-Assets = {
+Assets = 
+{
 	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
 	Asset("ATLAS", "images/"..IGLO_ICON..".xml"),
@@ -122,7 +124,8 @@ local function ModInit(inst)
 			return 
 		end
 
-		local settings = {
+		local settings = 
+		{
 			ReminderColor = GetModConfigData("REMINDER_COLOR"),
 			ReminderDuration = GetModConfigData("REMINDER_DURATION"),
 			CalendarUnits = GetModConfigData("CALENDAR_UNITS"),
