@@ -4,7 +4,7 @@ author = "Boas"
 version = "2.5"
 
 forumthread = ""
-description = "Keeps a record of the respawn durations of the bosses YOU kill."
+description = "Reminds you when the bosses YOU or OTHERS with this mod have killed respawn"
 
 api_version = 10
 
