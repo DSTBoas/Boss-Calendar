@@ -49,23 +49,26 @@ Assets =
 {
 	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
-	Asset("ATLAS", "images/"..IGLO_ICON..".xml"),
+	Asset("ATLAS", IGLO_ICON),
 }
-AddMinimapAtlas("images/"..IGLO_ICON..".xml")
+AddMinimapAtlas(IGLO_ICON)
 
 if MAPICONS_ENABLED then
-	AddClassPostConstruct("widgets/mapwidget", function(self)
+	local function MapWidgetPostConstruct(self)
 		BossCalendar:AddMapIcons(self, IGLO_ICON)
-	end)
+	end
+
+	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
 end
 
-AddPrefabPostInit("walrus_camp", function(inst)
-	inst:DoTaskInTime(0, function()
-		if inst and inst:IsValid() then
-			BossCalendar:AddCamp(inst, IGLO_ICON, IGLO_NUMBERS)
-		end
-	end)
-end)
+local function Walrus_Camp_PostInit(inst, recur)
+	if recur then
+		BossCalendar:AddCamp(inst, IGLO_ICON, IGLO_NUMBERS)
+	else
+		inst:DoTaskInTime(0, Walrus_Camp_PostInit, true)
+	end
+end
+AddPrefabPostInit("walrus_camp", Walrus_Camp_PostInit)
 
 local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -87,7 +90,7 @@ end
 
 for prefab in pairs(Prefabs) do
 	AddPrefabPostInit(prefab, function(inst)
-		inst:DoTaskInTime(0, function() ValidateDeath(inst) end)
+		inst:DoTaskInTime(0, ValidateDeath)
 	end)
 end
 
@@ -125,9 +128,9 @@ if OPEN_KEY then
 	end
 end
 
-local function ModInit(inst)
-	inst:DoTaskInTime(0, function()
-		if inst == GLOBAL.ThePlayer then 
+local function ModInit(inst, recur)
+	if recur then
+		if inst == GLOBAL.ThePlayer then
 			local settings = 
 			{
 				ReminderColor = GetModConfigData("REMINDER_COLOR"),
@@ -140,7 +143,9 @@ local function ModInit(inst)
 
 			BossCalendar:Init(settings)
 		end
-	end)
+	else
+		inst:DoTaskInTime(0, ModInit, true)
+	end
 end
 AddPlayerPostInit(ModInit)
-AddSimPostInit(function() BossCalendar:LoadIgloos() end)
+AddSimPostInit(BossCalendar.LoadIgloos)

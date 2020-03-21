@@ -139,7 +139,7 @@ function BossCalendar:AddMapIcons(widget, icon)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
 	for i = 1, #WalrusCamps do
-		widget.camp_icons:AddMapIcon("images/"..icon..".xml", icon.."_"..i..".tex", WalrusCamps[i])
+		widget.camp_icons:AddMapIcon(icon, icon:match("%iglo%a*").."_"..i..".tex", WalrusCamps[i])
 	end
 end
 
@@ -694,7 +694,7 @@ function BossCalendar:Open()
 	end
 
 	self:SetMode(self.mode)
-	self.updateTask = ThePlayer:DoPeriodicTask(1, function() self:Update() end)
+	self.updateTask = ThePlayer:DoPeriodicTask(1, self.Update)
 	
 	return true
 end

@@ -81,8 +81,8 @@ local keyslist =
 }
 local icons = 
 {
-	{description = "Big", data = "iglobig"},
-	{description = "Small", data = "iglo"}
+	{description = "Big", data = "images/iglobig.xml"},
+	{description = "Small", data = "images/iglo.xml"}
 }
 
 for i = 1, #COLORNAMES do
@@ -107,7 +107,7 @@ configuration_options =
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
 	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
 	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Short / Default / Long"),
-	AddConfig("Map icon size", "IGLO_ICON_SIZE", icons, "iglobig", "Big / Small"),
+	AddConfig("Map icon size", "IGLO_ICON_SIZE", icons, "images/iglobig.xml", "Big / Small"),
 	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
 	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
 	AddSectionTitle("Extra Settings"),
