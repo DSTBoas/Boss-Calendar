@@ -29,7 +29,7 @@ local function RGB(r, g, b)
 	return {r / 255, g / 255, b / 255, 1}
 end
 
-local ColorLookup = 
+local ColorToRGB = 
 {
 	White				= RGB(255, 255 ,255),
 	Red 				= RGB(255, 0, 0),
@@ -247,7 +247,7 @@ end
 
 function BossCalendar:Init(settings)
 	Settings = settings
-	Settings.ReminderColor = ColorLookup[Settings.ReminderColor]
+	Settings.ReminderColor = ColorToRGB[Settings.ReminderColor]
 	Settings.AnnounceStyle = Settings.AnnounceUnits and self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")] or self.AnnounceTime
 
 	Sayfn = ThePlayer.components.talker.Say
@@ -373,7 +373,7 @@ end
 
 local function LinkWalrus(inst)
 	local iglooNumber = GetClosestCamp(inst:GetPosition())
-	
+
 	return iglooNumber and GetTableName(iglooNumber) or inst.name
 end
 
