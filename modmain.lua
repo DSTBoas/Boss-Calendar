@@ -4,6 +4,13 @@ local IGLO_ICON_PATH = GetModConfigData("IGLO_ICON_PATH")
 local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 
+-- Fix until the next game update
+if IGLO_ICON_PATH == "iglobig" then
+	IGLO_ICON_PATH = "images/iglobig.xml"
+elseif IGLO_ICON_PATH == "iglo" then
+	IGLO_ICON_PATH = "images/iglo.xml"
+end
+
 local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
 local Prefabs =
