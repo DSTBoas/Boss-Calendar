@@ -228,7 +228,8 @@ function BossCalendar:LoadTimers()
 		end
 	else
 		for i = 1, #Npcs do
-			self.trackers[Npcs[i]] = {
+			self.trackers[Npcs[i]] = 
+			{
 				timer = nil,
 				deaths = 0
 			}
@@ -430,7 +431,8 @@ end
 --- Announce
 ---
 
-local NpcToObject = {
+local NpcToObject = 
+{
 	["Bee Queen"] = "Gigantic Beehive",
 	MacTusk = "Walrus Camp",
 	Fuelweaver = "Ancient Gateway"
