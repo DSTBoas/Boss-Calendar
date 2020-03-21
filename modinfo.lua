@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.3"
+version = "2.5"
 
 forumthread = ""
 description = "Keeps a record of the respawn durations of the bosses YOU kill."
