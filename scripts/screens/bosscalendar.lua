@@ -613,7 +613,8 @@ end
 function BossCalendar:Close()
 	if self.open then
 
-		if self.updateTask then self.updateTask:Cancel()
+		if self.updateTask then 
+			self.updateTask:Cancel()
 			self.updateTask = nil 
 		end
 
