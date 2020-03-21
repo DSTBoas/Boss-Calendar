@@ -68,10 +68,10 @@ if MAPICONS_ENABLED then
 	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
 end
 
-local function Walrus_Camp_PostInit(inst)
+local function WalrusCampPostInit(inst)
 	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, IGLO_ICON_PATH, IGLO_NUMBERS)
 end
-AddPrefabPostInit("walrus_camp", Walrus_Camp_PostInit)
+AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
 local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
