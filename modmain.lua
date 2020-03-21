@@ -127,21 +127,19 @@ end
 
 local function ModInit(inst)
 	inst:DoTaskInTime(0, function()
-		if inst ~= GLOBAL.ThePlayer then 
-			return 
+		if inst == GLOBAL.ThePlayer then 
+			local settings = 
+			{
+				ReminderColor = GetModConfigData("REMINDER_COLOR"),
+				ReminderDuration = GetModConfigData("REMINDER_DURATION"),
+				CalendarUnits = GetModConfigData("CALENDAR_UNITS"),
+				AnnounceStyle = GetModConfigData("ANNOUNCE_STYLES"),
+				AnnounceUnits = GetModConfigData("ANNOUNCE_UNITS"),
+				NetworkNotifications = GetModConfigData("NETWORK_NOTIFICATIONS")
+			} 
+
+			BossCalendar:Init(settings)
 		end
-
-		local settings = 
-		{
-			ReminderColor = GetModConfigData("REMINDER_COLOR"),
-			ReminderDuration = GetModConfigData("REMINDER_DURATION"),
-			CalendarUnits = GetModConfigData("CALENDAR_UNITS"),
-			AnnounceStyle = GetModConfigData("ANNOUNCE_STYLES"),
-			AnnounceUnits = GetModConfigData("ANNOUNCE_UNITS"),
-			NetworkNotifications = GetModConfigData("NETWORK_NOTIFICATIONS")
-		} 
-
-		BossCalendar:Init(settings)
 	end)
 end
 AddPlayerPostInit(ModInit)
