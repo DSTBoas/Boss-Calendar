@@ -495,9 +495,10 @@ end
 function BossCalendar:AnnounceDeaths(npc)
 	local amountOfKills = npc == "MacTusk" and self:GetTotalMacTuskKilled() or self.trackers[npc]["deaths"]
 
-	return 	amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
-			amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
-			string.format("I haven't killed %s yet.", npc)
+	return 		
+	amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
+	amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
+	string.format("I haven't killed %s yet.", npc)
 end
 
 function BossCalendar:AnnounceTime(npc)
@@ -516,8 +517,9 @@ function BossCalendar:Announce2(npc)
 	local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
 	local plural = tonumber(respawnDay) > 1 and "days" or "day"
 
-	return 	tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc) or 
-			string.format("%s respawns in %d %s.", npc, respawnDay, plural)
+	return
+	tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc) or 
+	string.format("%s respawns in %d %s.", npc, respawnDay, plural)
 end
 
 function BossCalendar:Announce2_5(npc)
