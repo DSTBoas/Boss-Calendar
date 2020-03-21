@@ -476,8 +476,9 @@ function BossCalendar:OnAnnounce(npc)
 end
 
 function BossCalendar:AnnounceToKill(npc)
-	return 	IsNearby(npc:trim()) and string.format("I am at %s.", npc) or
-			string.format("Let's kill %s.", npc)
+	return 	
+	IsNearby(npc:trim()) and string.format("I am at %s.", npc) or
+	string.format("Let's kill %s.", npc)
 end
 
 function BossCalendar:GetTotalMacTuskKilled()
