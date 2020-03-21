@@ -47,7 +47,7 @@ local NameToColor = {
 }
 
 ---
---- Helper functions
+--- Helper
 ---
 
 local function GetServerTime()
@@ -98,7 +98,7 @@ function string:trim()
 end
 
 ---
---- Reminder functions
+--- Reminder
 ---
 
 function BossCalendar:Say(message, time)
@@ -129,7 +129,7 @@ local function OnTimerDone(inst, data)
 end
 
 ---
---- Map icons / igloo functions
+--- Map icons / igloo
 ---
 
 function BossCalendar:AddMapIcons(widget, icon)
@@ -192,7 +192,7 @@ function BossCalendar:AddCamp(inst, map_icons, iglo_numbering)
 end
 
 --
--- Initialisation functions
+-- Initialisation
 --
 
 function BossCalendar:LoadIgloos()
@@ -259,7 +259,7 @@ function BossCalendar:Init(settings)
 end
 
 ---
---- Networking functions 
+--- Networking 
 ---
 
 local NetworkData = {}
@@ -337,7 +337,7 @@ Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, 
 end
 
 --
--- General functions
+-- General
 --
 
 local function GetTableName(walrus)
@@ -427,7 +427,7 @@ function BossCalendar:KilledMonster(npc, inst)
 end
 
 ---
---- Announce functions
+--- Announce
 ---
 
 local NpcToObject = {
@@ -532,7 +532,7 @@ function BossCalendar:Announce2_5(npc)
 end
 
 ---
---- GUI functions
+--- GUI
 ---
 
 function BossCalendar:Update()
