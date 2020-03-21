@@ -6,33 +6,40 @@ local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 
 local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
-local Prefabs = 
+local Prefabs =
 {
-	yellowgem = {
+	yellowgem =
+	{
 		npc = "Dragonfly",
 		death_anim = {"death"}
 	},
-	hivehat = {
+	hivehat =
+	{
 		npc = "Bee Queen",
 		death_anim = {"death"}
 	},
-	shroom_skin = {
+	shroom_skin =
+	{
 		npc = "Toadstool",
 		death_anim = {"death"}
 	},
-	klaussackkey = {
+	klaussackkey =
+	{
 		npc = "Klaus",
 		death_anim = {"death"}
 	},
-	blowdart_pipe = {
+	blowdart_pipe =
+	{
 		npc = "MacTusk",
 		death_anim = {"death"}
 	},
-	malbatross_beak = {
+	malbatross_beak =
+	{
 		npc = "Malbatross",
 		death_anim = {"death_ocean", "death"}
 	},
-	skeletonhat = {
+	skeletonhat =
+	{
 		npc = "Fuelweaver",
 		death_anim = {"death3"}
 	}
