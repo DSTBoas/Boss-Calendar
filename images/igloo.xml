@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="igloo.tex" />
+	<Elements>
+		<Element name="igloo_1.tex" u1="0.001" u2="0.4911875" v2="0.999" v1="0.5088125" variant="" />
+		<Element name="igloo_2.tex" u1="0.4931875" u2="0.983375" v2="0.999" v1="0.5088125" variant="" />
+		<Element name="igloo_3.tex" u1="0.001" u2="0.4911875" v2="0.5068125" v1="0.016625" variant="" />
+		<Element name="igloo_4.tex" u1="0.4931875" u2="0.983375" v2="0.5068125" v1="0.016625" variant="" />
+	</Elements>
+</Atlas>

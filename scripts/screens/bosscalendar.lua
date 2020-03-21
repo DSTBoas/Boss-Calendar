@@ -139,7 +139,7 @@ function BossCalendar:AddMapIcons(widget, iconPath)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
 	for i = 1, #WalrusCamps do
-		widget.camp_icons:AddMapIcon(iconPath, iconPath:match("%iglo%a*").."_"..i..".tex", WalrusCamps[i])
+		widget.camp_icons:AddMapIcon(iconPath, iconPath:match("%igloo%a*").."_"..i..".tex", WalrusCamps[i])
 	end
 end
 
@@ -176,21 +176,21 @@ local function InsertCamp(pos)
 	return GetCampNumber(pos)
 end
 
-function BossCalendar:AddCamp(inst, map_icons, iglo_numbering)
+function BossCalendar:AddCamp(inst, mapIconsEnabled, iglooIconPath, iglooNumbering)
 	local ceilVector = CeilVector(inst:GetPosition())
-	local campNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
+	local iglooNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
 
-	if iglo_numbering then
+	if iglooNumbering then
 		inst.entity:AddLabel()
 		inst.Label:SetFont(CHATFONT_OUTLINE)
 		inst.Label:SetFontSize(35)
 		inst.Label:SetWorldOffset(0, 5, 0)
-		inst.Label:SetText(campNumber)
+		inst.Label:SetText(iglooNumber)
 		inst.Label:Enable(true)
 	end
 
-	if map_icons then
-		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", map_icons, campNumber))
+	if mapIconsEnabled then
+		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", iglooIconPath:match("%igloo%a*"), iglooNumber))
 	end
 end
 

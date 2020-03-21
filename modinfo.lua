@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.5"
+version = "2.6"
 
 forumthread = ""
 description = "Reminds you when the bosses YOU or OTHERS with this mod have killed respawn"
@@ -81,8 +81,8 @@ local keyslist =
 }
 local icons = 
 {
-	{description = "Big", data = "images/iglobig.xml"},
-	{description = "Small", data = "images/iglo.xml"}
+	{description = "Big", data = "images/igloobig.xml"},
+	{description = "Small", data = "images/igloo.xml"}
 }
 
 for i = 1, #COLORNAMES do
@@ -107,9 +107,9 @@ configuration_options =
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
 	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
 	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Short / Default / Long"),
-	AddConfig("Map icon size", "IGLO_ICON_PATH", icons, "images/iglobig.xml", "Big / Small"),
-	AddConfig("Map icons", "MAPICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
-	AddConfig("Igloo numbering", "IGLO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
+	AddConfig("Map icon size", "IGLOO_ICON_PATH", icons, "images/igloobig.xml", "Big / Small"),
+	AddConfig("Map icons", "MAP_ICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
+	AddConfig("Igloo numbering", "IGLOO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
 	AddSectionTitle("Extra Settings"),
 	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Days / Time"),
 	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Days / Time"),

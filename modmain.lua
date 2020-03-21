@@ -1,14 +1,14 @@
 local OPEN_KEY = GetModConfigData("OPEN_KEY")
 local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
-local IGLO_ICON_PATH = GetModConfigData("IGLO_ICON_PATH")
-local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
-local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
+local IGLOO_ICON_PATH = GetModConfigData("IGLOO_ICON_PATH")
+local MAP_ICONS_ENABLED = GetModConfigData("MAP_ICONS_ENABLED")
+local IGLOO_NUMBERS = GetModConfigData("IGLOO_NUMBERS")
 
--- Fix until the next game update
-if IGLO_ICON_PATH == "iglobig" then
-	IGLO_ICON_PATH = "images/iglobig.xml"
-elseif IGLO_ICON_PATH == "iglo" then
-	IGLO_ICON_PATH = "images/iglo.xml"
+-- Support for legacy code until the next game update
+if IGLOO_ICON_PATH == "iglobig" or IGLOO_ICON_PATH == "images/iglobig.xml" then
+	IGLOO_ICON_PATH = "images/igloobig.xml"
+elseif IGLOO_ICON_PATH == "iglo" or IGLOO_ICON_PATH == "images/iglo.xml" then
+	IGLOO_ICON_PATH = "images/igloo.xml"
 end
 
 local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
@@ -56,20 +56,20 @@ Assets =
 {
 	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
-	Asset("ATLAS", IGLO_ICON_PATH),
+	Asset("ATLAS", IGLOO_ICON_PATH),
 }
-AddMinimapAtlas(IGLO_ICON_PATH)
+AddMinimapAtlas(IGLOO_ICON_PATH)
 
-if MAPICONS_ENABLED then
+if MAP_ICONS_ENABLED then
 	local function MapWidgetPostConstruct(self)
-		BossCalendar:AddMapIcons(self, IGLO_ICON_PATH)
+		BossCalendar:AddMapIcons(self, IGLOO_ICON_PATH)
 	end
 
 	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
 end
 
 local function WalrusCampPostInit(inst)
-	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, IGLO_ICON_PATH, IGLO_NUMBERS)
+	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, MAP_ICONS_ENABLED, IGLOO_ICON_PATH, IGLOO_NUMBERS)
 end
 AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
@@ -131,10 +131,10 @@ if OPEN_KEY then
 	end
 end
 
-local function Init(inst, recur)
-	if recur then
+local function Init(inst, settings)
+	if settings then
 		if inst == GLOBAL.ThePlayer then
-			local settings = 
+			settings = 
 			{
 				ReminderColor = GetModConfigData("REMINDER_COLOR"),
 				ReminderDuration = GetModConfigData("REMINDER_DURATION"),
