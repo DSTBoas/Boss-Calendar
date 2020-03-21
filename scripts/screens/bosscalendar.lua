@@ -248,7 +248,7 @@ end
 function BossCalendar:Init(settings)
 	Settings = settings
 	Settings.ReminderColor = ColorLookup[Settings.ReminderColor]
-	Settings.AnnounceStyle = Settings.AnnounceUnits and self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")] or Settings.AnnounceStyle = self.AnnounceTime
+	Settings.AnnounceStyle = Settings.AnnounceUnits and self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")] or self.AnnounceTime
 
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
