@@ -69,7 +69,7 @@ end)
 
 local function GetNpc(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x, y, z, 15, 0, 0, {"epic", "walrus"})
+	local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus"})
 	return ents[1]
 end
 
