@@ -68,12 +68,8 @@ if MAPICONS_ENABLED then
 	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
 end
 
-local function Walrus_Camp_PostInit(inst, recur)
-	if recur then
-		BossCalendar:AddCamp(inst, IGLO_ICON_PATH, IGLO_NUMBERS)
-	else
-		inst:DoTaskInTime(0, Walrus_Camp_PostInit, true)
-	end
+local function Walrus_Camp_PostInit(inst)
+	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, IGLO_ICON_PATH, IGLO_NUMBERS)
 end
 AddPrefabPostInit("walrus_camp", Walrus_Camp_PostInit)
 
