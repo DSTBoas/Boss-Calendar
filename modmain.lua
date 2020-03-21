@@ -128,7 +128,7 @@ if OPEN_KEY then
 	end
 end
 
-local function ModInit(inst, recur)
+local function Init(inst, recur)
 	if recur then
 		if inst == GLOBAL.ThePlayer then
 			local settings = 
@@ -144,8 +144,8 @@ local function ModInit(inst, recur)
 			BossCalendar:Init(settings)
 		end
 	else
-		inst:DoTaskInTime(0, ModInit, true)
+		inst:DoTaskInTime(0, Init, true)
 	end
 end
-AddPlayerPostInit(ModInit)
+AddPlayerPostInit(Init)
 AddSimPostInit(BossCalendar.LoadIgloos)
