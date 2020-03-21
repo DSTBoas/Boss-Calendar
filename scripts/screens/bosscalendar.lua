@@ -135,11 +135,11 @@ end
 --- Map icons / igloo
 ---
 
-function BossCalendar:AddMapIcons(widget, icon)
+function BossCalendar:AddMapIcons(widget, iconPath)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
 	for i = 1, #WalrusCamps do
-		widget.camp_icons:AddMapIcon(icon, icon:match("%iglo%a*").."_"..i..".tex", WalrusCamps[i])
+		widget.camp_icons:AddMapIcon(iconPath, iconPath:match("%iglo%a*").."_"..i..".tex", WalrusCamps[i])
 	end
 end
 
