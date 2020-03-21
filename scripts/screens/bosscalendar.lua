@@ -243,7 +243,11 @@ end
 
 function BossCalendar:Init(settings)
 	Settings = settings
-	Settings.AnnounceStyle = BossCalendar["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")]
+	if Settings.AnnounceUnits then
+		Settings.AnnounceStyle = self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")]
+	else
+		Settings.AnnounceStyle = self.AnnounceTime
+	end
 
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
@@ -496,6 +500,11 @@ function BossCalendar:AnnounceDeaths(npc)
 			string.format("I haven't killed %s yet.", npc)
 end
 
+function BossCalendar:AnnounceTime(npc)
+	local respawnDay = SecondsToTime(self.trackers[npc]["timer"], true)
+	return string.format("%s respawns in %s.", npc, respawnDay)
+end
+
 function BossCalendar:Announce1(npc)
 	local respawnDay = math.floor(self.trackers[npc]["timer"] / TUNING.TOTAL_DAY_TIME)
 	respawnDay = respawnDay + 1
@@ -643,7 +652,7 @@ function BossCalendar:Open()
 	self.skull = self.root:AddChild(Image("images/skull.xml", "skull.tex"))
 	self.skull:SetSize(34, 34)
 	self.skull:SetPosition(325, 200)
-	self.skull.OnMouseButton = function(image, button, down)
+	self.skull.OnMouseButton = function(_, button, down)
 		if button == 1000 and down then
 			self:SetMode("deaths")
 		end
@@ -652,7 +661,7 @@ function BossCalendar:Open()
 	self.compass = self.root:AddChild(Image("images/inventoryimages1.xml", "compass.tex"))
 	self.compass:SetSize(21, 21)
 	self.compass:SetPosition(300, 200)
-	self.compass.OnMouseButton = function(image, button, down)
+	self.compass.OnMouseButton = function(_, button, down)
 		if button == 1000 and down then
 			self:SetMode("timer")
 		end
@@ -661,6 +670,7 @@ function BossCalendar:Open()
 	for i = 1, #Npcs do
 		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
 		local npcImage = Npcs[i].."img"
+
 		self[Npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
 		self[Npcs[i]]:SetPosition(x, y + 140)
 		self[Npcs[i]]:SetString(Npcs[i])
@@ -668,7 +678,7 @@ function BossCalendar:Open()
 		self[npcImage] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
 		self[npcImage]:SetSize(68, 68)
 		self[npcImage]:SetPosition(x, y + 95)
-		self[npcImage].OnMouseButton = function(image, button, down) 
+		self[npcImage].OnMouseButton = function(_, button, down) 
 			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
 				self:OnAnnounce(Npcs[i])
 			end
