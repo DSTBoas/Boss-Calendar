@@ -305,10 +305,6 @@ function BossCalendar:NetworkBossKilled(data)
 	end
 	
 	local npc = NetworkData["npc"]
-	if not npc then 
-		return 
-	end
-
 	if npc:trim() == "MacTusk" then
 		npc = NetworkWalrus(NetworkData["camp"])
 		if not npc then 
@@ -339,9 +335,9 @@ Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, 
 	end
 end
 
---
--- General
---
+---
+--- General
+---
 
 local function GetTableName(walrus)
 	local c = 1
@@ -424,8 +420,8 @@ function BossCalendar:KilledMonster(npc, inst)
 			ThePlayer.components.timer:StartTimer(npc, respawnTime)
 			self:AddKill(npc)
 			self:Save()
-			local cmd = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
-			TheNet:Say(cmd, false, true)
+			local query = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
+			TheNet:Say(query, false, true)
 		end
 	end
 end
