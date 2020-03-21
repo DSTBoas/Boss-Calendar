@@ -177,20 +177,22 @@ local function InsertCamp(pos)
 end
 
 function BossCalendar:AddCamp(inst, mapIconsEnabled, iglooIconPath, iglooNumbering)
-	local ceilVector = CeilVector(inst:GetPosition())
-	local iglooNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
+	if inst and inst:IsValid() then
+		local ceilVector = CeilVector(inst:GetPosition())
+		local iglooNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
 
-	if iglooNumbering then
-		inst.entity:AddLabel()
-		inst.Label:SetFont(CHATFONT_OUTLINE)
-		inst.Label:SetFontSize(35)
-		inst.Label:SetWorldOffset(0, 5, 0)
-		inst.Label:SetText(iglooNumber)
-		inst.Label:Enable(true)
-	end
+		if iglooNumbering then
+			inst.entity:AddLabel()
+			inst.Label:SetFont(CHATFONT_OUTLINE)
+			inst.Label:SetFontSize(35)
+			inst.Label:SetWorldOffset(0, 5, 0)
+			inst.Label:SetText(iglooNumber)
+			inst.Label:Enable(true)
+		end
 
-	if mapIconsEnabled then
-		inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", iglooIconPath:match("%igloo%a*"), iglooNumber))
+		if mapIconsEnabled then
+			inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", iglooIconPath:match("%igloo%a*"), iglooNumber))
+		end
 	end
 end
 
