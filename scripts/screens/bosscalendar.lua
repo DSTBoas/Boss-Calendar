@@ -373,6 +373,7 @@ end
 
 local function LinkWalrus(inst)
 	local iglooNumber = GetClosestCamp(inst:GetPosition())
+	
 	return iglooNumber and GetTableName(iglooNumber) or inst.name
 end
 

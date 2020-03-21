@@ -20,8 +20,8 @@ all_clients_require_mod = false
 client_only_mod = true
 server_filter_tags = {}
 
-
-local COLORNAMES = {
+local COLORNAMES = 
+{
 	"White",
 	"Red",
 	"Coral",
@@ -48,37 +48,44 @@ local function AddSectionTitle(title)
 end
 
 local colors = {}
-local announce_styles = {
+local announce_styles = 
+{
 	{description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21." },
 	{description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
 	{description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
 }
-local say_duration = {
+local say_duration = 
+{
 	{description = "Short", data = 3, hover = "Reminders last for 3 seconds"},
 	{description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
 	{description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
 }
-local boolunits = {
+local boolunits = 
+{
 	{description = "Days", data = true},
 	{description = "Time", data = false}
 }
-local boolnohover = {
+local boolnohover = 
+{
 	{description = "Enabled", data = true },
 	{description = "Disabled", data = false}
 }
-local bool = {
+local bool = 
+{
 	{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar"},
 	{description = "Hold", data = false, hover = "Hold: Holding the key opens the Boss Calendar"}
 }
-local keyslist = {
+local keyslist = 
+{
 	{description = "Disabled", data = false}
 }
-local icons = {
+local icons = 
+{
 	{description = "Big", data = "iglobig"},
 	{description = "Small", data = "iglo"}
 }
 
-for i = 1 , #COLORNAMES do
+for i = 1, #COLORNAMES do
 	colors[i] = {description = COLORNAMES[i], data = COLORNAMES[i]}
 end
 
