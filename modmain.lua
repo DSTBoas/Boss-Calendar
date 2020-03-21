@@ -1,6 +1,6 @@
 local OPEN_KEY = GetModConfigData("OPEN_KEY")
 local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
-local IGLO_ICON = GetModConfigData("IGLO_ICON_SIZE")
+local IGLO_ICON_PATH = GetModConfigData("IGLO_ICON_PATH")
 local MAPICONS_ENABLED = GetModConfigData("MAPICONS_ENABLED")
 local IGLO_NUMBERS = GetModConfigData("IGLO_NUMBERS")
 
@@ -49,13 +49,13 @@ Assets =
 {
 	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
-	Asset("ATLAS", IGLO_ICON),
+	Asset("ATLAS", IGLO_ICON_PATH),
 }
-AddMinimapAtlas(IGLO_ICON)
+AddMinimapAtlas(IGLO_ICON_PATH)
 
 if MAPICONS_ENABLED then
 	local function MapWidgetPostConstruct(self)
-		BossCalendar:AddMapIcons(self, IGLO_ICON)
+		BossCalendar:AddMapIcons(self, IGLO_ICON_PATH)
 	end
 
 	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
@@ -63,7 +63,7 @@ end
 
 local function Walrus_Camp_PostInit(inst, recur)
 	if recur then
-		BossCalendar:AddCamp(inst, IGLO_ICON, IGLO_NUMBERS)
+		BossCalendar:AddCamp(inst, IGLO_ICON_PATH, IGLO_NUMBERS)
 	else
 		inst:DoTaskInTime(0, Walrus_Camp_PostInit, true)
 	end
