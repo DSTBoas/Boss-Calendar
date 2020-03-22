@@ -5,11 +5,15 @@ local Image = require "widgets/image"
 local PersistentData = require("persistentdata")
 local PersistentMapIcons = require("widgets/persistentmapicons")
 local StatusAnnouncer = require("announcer")()
-local ValidJson = require "validJson"
+local IsValidJson = require "validJson"
 
+local function RGB(r, g, b)
+	return {r / 255, g / 255, b / 255, 1}
+end
+
+local BossCalendar = Class(Screen)
 local DataContainer = PersistentData("BossCalendar")
-local WalrusCamps = {}
-local Settings = {}
+local WalrusCamps, Settings, NpcImages = {}, {}, {}
 local RespawnDurations = 
 {
 	toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
@@ -22,13 +26,6 @@ local Npcs =
 	"Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", 
 	"MacTusk IV", "Klaus"
 }
-local Session, Sayfn
-local BossCalendar = Class(Screen)
-
-local function RGB(r, g, b)
-	return {r / 255, g / 255, b / 255, 1}
-end
-
 local ColorToRGB = 
 {
 	White				= RGB(255, 255 ,255),
@@ -48,6 +45,7 @@ local ColorToRGB =
 	Purple				= RGB(128, 0, 128),
 	Pink				= RGB(255, 192, 203)
 }
+local Session, Sayfn
 
 ---
 --- Helper
@@ -196,9 +194,9 @@ function BossCalendar:AddCamp(inst, mapIconsEnabled, iglooIconPath, iglooNumberi
 	end
 end
 
---
--- Initialisation
---
+---
+--- Initialisation
+---
 
 function BossCalendar:LoadIgloos()
 	DataContainer:Load()
@@ -210,10 +208,15 @@ function BossCalendar:LoadIgloos()
 	end
 end
 
-function BossCalendar:LoadTimers()
+function BossCalendar:Setup()
 	Session = tostring(TheWorld.net.components.shardstate:GetMasterSessionId())
 	local SavedData = DataContainer:GetValue(Session.."_data")
-	local reminders = {}
+	local absenceReminder = {}
+
+	for i = 1, #Npcs do
+		NpcImages[i] = Npcs[i].."_img"
+	end
+
 	self.trackers = {}
 	if SavedData then
 		self.trackers = SavedData
@@ -224,26 +227,28 @@ function BossCalendar:LoadTimers()
 					ThePlayer.components.timer:StartTimer(Npcs[i], time)
 				else
 					self.trackers[Npcs[i]].timer = nil
-					table.insert(reminders, Npcs[i])
+					table.insert(absenceReminder, Npcs[i])
 				end
 			end
 		end
 	else
 		for i = 1, #Npcs do
-			self.trackers[Npcs[i]] = 
+			self.trackers[Npcs[i]] =
 			{
 				timer = nil,
 				deaths = 0
 			}
 		end
 	end
-	if #reminders > 0 then
+
+	if #absenceReminder > 0 then
 		ThePlayer:DoTaskInTime(5, function()
-			local glue = #reminders == 2 and " & " or ", " 
-			self:Say(table.concat(reminders, glue)..(#reminders == 1 and " has" or " have").." respawned.", 5)
+			local glue = #absenceReminder == 2 and " & " or ", "
+			self:Say(table.concat(absenceReminder, glue)..(#absenceReminder == 1 and " has" or " have").." respawned.", 5)
 			self:Save()
 		end)
-	end  
+	end
+
 	self.init = true
 end
 
@@ -258,7 +263,7 @@ function BossCalendar:Init(settings)
 
 	self.mode = "timer"
 	self.talking = false
-	self:LoadTimers()
+	self:Setup()
 end
 
 ---
@@ -276,7 +281,7 @@ local function DataPack(npc, timer, player, camp)
 end
 
 local function DataUnpack(data)
-	if ValidJson(data) then
+	if IsValidJson(data) then
 		NetworkData = json.decode(data)
 		return (NetworkData["npc"] and NetworkData["timer"] and NetworkData["player"] and NetworkData["camp"])
 	end
@@ -312,7 +317,7 @@ function BossCalendar:NetworkBossKilled(data)
 		end
 	end
 	
-	if self.trackers[npc] and not self.trackers[npc]["timer"] then
+	if npc and not self.trackers[npc]["timer"] then
 		self.trackers[npc]["timer"] = NetworkData["timer"]
 		ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
 		self:Save()
@@ -420,6 +425,8 @@ function BossCalendar:KilledMonster(npc, inst)
 			ThePlayer.components.timer:StartTimer(npc, respawnTime)
 			self:AddKill(npc)
 			self:Save()
+
+			-- Networking
 			local query = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
 			TheNet:Say(query, false, true)
 		end
@@ -496,7 +503,6 @@ end
 
 function BossCalendar:AnnounceDeaths(npc)
 	local amountOfKills = npc == "MacTusk" and self:GetTotalMacTuskKilled() or self.trackers[npc]["deaths"]
-
 	return 		
 		amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
 		amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
@@ -505,21 +511,18 @@ end
 
 function BossCalendar:AnnounceTime(npc)
 	local respawnDay = SecondsToTime(self.trackers[npc]["timer"], true)
-
 	return string.format("%s respawns in %s.", npc, respawnDay)
 end
 
 function BossCalendar:Announce1(npc)
 	local respawnDay = math.floor(self.trackers[npc]["timer"] / TUNING.TOTAL_DAY_TIME)
 	respawnDay = respawnDay + 1
-
 	return string.format("%s respawns on day %d.", npc, respawnDay)
 end
 
 function BossCalendar:Announce2(npc)
 	local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
 	local plural = tonumber(respawnDay) > 1 and "days" or "day"
-
 	return
 		tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc) or 
 		string.format("%s respawns in %d %s.", npc, respawnDay, plural)
@@ -528,7 +531,6 @@ end
 function BossCalendar:Announce2_5(npc)
 	local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
 	respawnDay = respawnDay..(tonumber(respawnDay) > 1 and " days" or " day")
-
 	return string.format("%s respawns in %s.", npc, respawnDay)
 end
 
@@ -536,71 +538,67 @@ end
 --- GUI
 ---
 
+function BossCalendar:Update_timer(npc, img)
+	local str = ""
+	if self.trackers[npc][self.mode] then
+		self[img]:SetTint(0,0,0,1)
+		self[npc]:SetColour(1,0,0,1)
+		str = 	Settings.CalendarUnits and SecondsToDays(self.trackers[npc][self.mode]).."d" or
+				SecondsToTime(self.trackers[npc][self.mode])
+	else
+		self[img]:SetTint(1,1,1,1)
+		self[npc]:SetColour(1,1,1,1)
+		str = npc
+	end
+	return str
+end
+
+function BossCalendar:Update_deaths(npc, img)
+	self[img]:SetTint(1,1,1,1)
+	self[npc]:SetColour(1,1,1,1)
+	local amountOfKills = 	npc == "MacTusk" and self:GetTotalMacTuskKilled() or
+							self.trackers[npc][self.mode]
+	return string.format("Killed: %d", amountOfKills)
+end
+
 function BossCalendar:Update()
 	if not self.open or not self.init then 
 		return 
 	end
 
 	for i = 1, #Npcs do
-		local str = ""
-		if self.trackers[Npcs[i]][self.mode] then
-			if self.mode == "timer" then
-				self[Npcs[i].."img"]:SetTint(0,0,0,1)
-				self[Npcs[i]]:SetColour(1,0,0,1)
-				if Settings.CalendarUnits then
-					str = SecondsToDays(self.trackers[Npcs[i]][self.mode]).."d"
-				else
-					str = SecondsToTime(self.trackers[Npcs[i]][self.mode])
-				end
-			else
-				self[Npcs[i].."img"]:SetTint(1,1,1,1)
-				self[Npcs[i]]:SetColour(1,1,1,1)
-				if Npcs[i] == "MacTusk" then
-					str = "Killed: "..self:GetTotalMacTuskKilled()
-				else
-					str = "Killed: "..self.trackers[Npcs[i]][self.mode]
-				end
-			end
-		else
-			self[Npcs[i].."img"]:SetTint(1,1,1,1)
-			self[Npcs[i]]:SetColour(1,1,1,1)
-			if self.mode == "timer" then
-				str = Npcs[i]
-			else
-				str = "Killed: 0"
-			end
-		end
-		self[Npcs[i]]:SetString(str)
+		self[Npcs[i]]:SetString(self.GetStringFrom(self, Npcs[i], NpcImages[i]))
 	end
 end
 
 function BossCalendar:SetMode(mode)
 	self.mode = mode
-	
+	self.GetStringFrom = self["Update_"..self.mode]
+
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
-		self.Klausimg:SetPosition(-135, -55)
+		self.Klaus_img:SetPosition(-135, -55)
 		self.Klaus:Show()
-		self.Klausimg:Show()
+		self.Klaus_img:Show()
 		self.compass:SetTint(0, 0, 0, 1)
 		self.skull:SetTint(1, 1, 1, 1)
 	else
 		self.compass:SetTint(1, 1, 1, 1)
 		self.skull:SetTint(0, 0, 0, 1)
 		self.Klaus:SetPosition(225, -10)
-		self.Klausimg:SetPosition(225, -55)
+		self.Klaus_img:SetPosition(225, -55)
 		if WORLD_SPECIAL_EVENT ~= SPECIAL_EVENTS["WINTERS_FEAST"] then
-			self.Klausimg:Hide()
+			self.Klaus_img:Hide()
 			self.Klaus:Hide()
 		end
 	end
 
 	for i = 7, 9 do
 		if self.mode == "deaths" then
-			self[Npcs[i].."img"]:Hide()
+			self[NpcImages[i]]:Hide()
 			self[Npcs[i]]:Hide()
 		else
-			self[Npcs[i].."img"]:Show()
+			self[NpcImages[i]]:Show()
 			self[Npcs[i]]:Show()
 		end
 	end
@@ -675,16 +673,15 @@ function BossCalendar:Open()
 
 	for i = 1, #Npcs do
 		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
-		local npcImage = Npcs[i].."img"
 
 		self[Npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
 		self[Npcs[i]]:SetPosition(x, y + 140)
 		self[Npcs[i]]:SetString(Npcs[i])
 
-		self[npcImage] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
-		self[npcImage]:SetSize(68, 68)
-		self[npcImage]:SetPosition(x, y + 95)
-		self[npcImage].OnMouseButton = function(_, button, down) 
+		self[NpcImages[i]] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
+		self[NpcImages[i]]:SetSize(68, 68)
+		self[NpcImages[i]]:SetPosition(x, y + 95)
+		self[NpcImages[i]].OnMouseButton = function(_, button, down) 
 			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
 				self:OnAnnounce(Npcs[i])
 			end

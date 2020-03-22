@@ -56,9 +56,9 @@ local announce_styles =
 }
 local say_duration = 
 {
-	{description = "Short", data = 3, hover = "Reminders last for 3 seconds"},
-	{description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
 	{description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
+	{description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
+	{description = "Short", data = 3, hover = "Reminders last for 3 seconds"}
 }
 local boolunits = 
 {
