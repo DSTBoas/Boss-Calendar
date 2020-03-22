@@ -376,7 +376,6 @@ end
 
 local function LinkWalrus(inst)
 	local iglooNumber = GetClosestCamp(inst:GetPosition())
-
 	return iglooNumber and GetTableName(iglooNumber) or inst.name
 end
 
@@ -567,13 +566,13 @@ function BossCalendar:Update()
 	end
 
 	for i = 1, #Npcs do
-		self[Npcs[i]]:SetString(self.GetStringFrom(self, Npcs[i], NpcImages[i]))
+		self[Npcs[i]]:SetString(self:GetGuiString(Npcs[i], NpcImages[i]))
 	end
 end
 
 function BossCalendar:SetMode(mode)
 	self.mode = mode
-	self.GetStringFrom = self["Update_"..self.mode]
+	self.GetGuiString = self["Update_"..self.mode]
 
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)
