@@ -106,7 +106,7 @@ configuration_options =
 	AddConfig("Open mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
 	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
-	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Short / Default / Long"),
+	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Long / Default / Short"),
 	AddConfig("Map icon size", "IGLOO_ICON_PATH", icons, "images/igloobig.xml", "Big / Small"),
 	AddConfig("Map icons", "MAP_ICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
 	AddConfig("Igloo numbering", "IGLOO_NUMBERS", boolnohover, true, "Igloos display their number above them"),

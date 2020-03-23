@@ -537,7 +537,7 @@ end
 --- GUI
 ---
 
-function BossCalendar:Update_timer(npc, img)
+function BossCalendar:Get_timer(npc, img)
 	local str = ""
 	if self.trackers[npc][self.mode] then
 		self[img]:SetTint(0,0,0,1)
@@ -552,7 +552,7 @@ function BossCalendar:Update_timer(npc, img)
 	return str
 end
 
-function BossCalendar:Update_deaths(npc, img)
+function BossCalendar:Get_deaths(npc, img)
 	self[img]:SetTint(1,1,1,1)
 	self[npc]:SetColour(1,1,1,1)
 	local amountOfKills = 	npc == "MacTusk" and self:GetTotalMacTuskKilled() or
@@ -572,7 +572,7 @@ end
 
 function BossCalendar:SetMode(mode)
 	self.mode = mode
-	self.GetGuiString = self["Update_"..self.mode]
+	self.GetGuiString = self["Get_"..self.mode]
 
 	if self.mode == "deaths" then
 		self.Klaus:SetPosition(-135, -10)

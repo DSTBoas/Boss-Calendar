@@ -11,7 +11,8 @@ elseif IGLOO_ICON_PATH == "iglo" or IGLOO_ICON_PATH == "images/iglo.xml" then
 	IGLOO_ICON_PATH = "images/igloo.xml"
 end
 
-local GLOBAL, require, TheInput = GLOBAL, GLOBAL.require, GLOBAL.TheInput
+local GLOBAL = GLOBAL
+local require, TheInput = GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
 local Prefabs =
 {
@@ -43,7 +44,11 @@ local Prefabs =
 	malbatross_beak =
 	{
 		npc = "Malbatross",
-		death_anim = {"death_ocean", "death"}
+		death_anim =
+		{
+			"death_ocean", 
+			"death"
+		}
 	},
 	skeletonhat =
 	{
@@ -131,10 +136,10 @@ if OPEN_KEY then
 	end
 end
 
-local function Init(inst, settings)
-	if settings then
+local function Init(inst, recur)
+	if recur then
 		if inst == GLOBAL.ThePlayer then
-			settings = 
+			BossCalendar:Init(
 			{
 				ReminderColor = GetModConfigData("REMINDER_COLOR"),
 				ReminderDuration = GetModConfigData("REMINDER_DURATION"),
@@ -142,9 +147,7 @@ local function Init(inst, settings)
 				AnnounceStyle = GetModConfigData("ANNOUNCE_STYLES"),
 				AnnounceUnits = GetModConfigData("ANNOUNCE_UNITS"),
 				NetworkNotifications = GetModConfigData("NETWORK_NOTIFICATIONS")
-			} 
-
-			BossCalendar:Init(settings)
+			})
 		end
 	else
 		inst:DoTaskInTime(0, Init, true)
