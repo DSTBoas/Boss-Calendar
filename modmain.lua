@@ -154,4 +154,5 @@ local function Init(inst, recur)
 	end
 end
 AddPlayerPostInit(Init)
+
 AddSimPostInit(BossCalendar.LoadIgloos)
