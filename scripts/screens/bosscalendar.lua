@@ -556,7 +556,7 @@ function BossCalendar:Get_deaths(npc, img)
 	self[img]:SetTint(1,1,1,1)
 	self[npc]:SetColour(1,1,1,1)
 	local amountOfKills = 	npc == "MacTusk" and self:GetTotalMacTuskKilled() or
-							self.trackers[npc][self.mode]
+				self.trackers[npc][self.mode]
 	return string.format("Killed: %d", amountOfKills)
 end
 
