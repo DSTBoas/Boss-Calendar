@@ -16,6 +16,48 @@ local RespawnDurations =
 	stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
 	malbatross = 7200
 }
+local DeathAnimations =
+{
+	yellowgem =
+	{
+		npc = "Dragonfly",
+		death_anim = {"death"}
+	},
+	hivehat =
+	{
+		npc = "Bee Queen",
+		death_anim = {"death"}
+	},
+	shroom_skin =
+	{
+		npc = "Toadstool",
+		death_anim = {"death"}
+	},
+	klaussackkey =
+	{
+		npc = "Klaus",
+		death_anim = {"death"}
+	},
+	blowdart_pipe =
+	{
+		npc = "MacTusk",
+		death_anim = {"death"}
+	},
+	malbatross_beak =
+	{
+		npc = "Malbatross",
+		death_anim =
+		{
+			"death_ocean", 
+			"death"
+		}
+	},
+	skeletonhat =
+	{
+		npc = "Fuelweaver",
+		death_anim = {"death3"}
+	}
+}
 local Npcs = 
 {	
 	"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", 
@@ -348,6 +390,24 @@ end
 ---
 --- General
 ---
+
+local function GetNpc(inst)
+	local x, y, z = inst.Transform:GetWorldPosition()
+	local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus"})
+	return ents[1]
+end
+
+function BossCalendar:ValidateDeath(inst)
+	local npc = GetNpc(inst)
+	if npc and npc:IsValid() then
+		for i = 1, #DeathAnimations[inst.prefab].death_anim do
+			if npc.AnimState:IsCurrentAnimation(DeathAnimations[inst.prefab].death_anim[i]) then
+				self:KilledMonster(DeathAnimations[inst.prefab].npc, npc)
+				return
+			end
+		end
+	end
+end
 
 local function GetTableName(walrus)
 	local c = 1

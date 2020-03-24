@@ -3,48 +3,6 @@ local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
 local GLOBAL = GLOBAL
 local require, TheInput = GLOBAL.require, GLOBAL.TheInput
 local BossCalendar = require("screens/bosscalendar")
-local Prefabs =
-{
-	yellowgem =
-	{
-		npc = "Dragonfly",
-		death_anim = {"death"}
-	},
-	hivehat =
-	{
-		npc = "Bee Queen",
-		death_anim = {"death"}
-	},
-	shroom_skin =
-	{
-		npc = "Toadstool",
-		death_anim = {"death"}
-	},
-	klaussackkey =
-	{
-		npc = "Klaus",
-		death_anim = {"death"}
-	},
-	blowdart_pipe =
-	{
-		npc = "MacTusk",
-		death_anim = {"death"}
-	},
-	malbatross_beak =
-	{
-		npc = "Malbatross",
-		death_anim =
-		{
-			"death_ocean", 
-			"death"
-		}
-	},
-	skeletonhat =
-	{
-		npc = "Fuelweaver",
-		death_anim = {"death3"}
-	}
-}
 
 Assets = 
 {
@@ -53,7 +11,6 @@ Assets =
 	Asset("ATLAS", "images/igloo.xml"),
 }
 AddMinimapAtlas("images/igloo.xml")
-
 
 if GetModConfigData("IGLOO_ICON") then
 	local function MapWidgetPostConstruct(self)
@@ -64,32 +21,26 @@ if GetModConfigData("IGLOO_ICON") then
 end
 
 local function WalrusCampPostInit(inst)
-	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, IGLOO_ICON, IGLOO_NUMBERS)
+	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst)
 end
 AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
-local function GetNpc(inst)
-	local x, y, z = inst.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus"})
-	return ents[1]
-end
-
-local function ValidateDeath(inst)
-	local npc = GetNpc(inst)
-	if npc and npc:IsValid() then
-		for i = 1, #Prefabs[inst.prefab].death_anim do
-			if npc.AnimState:IsCurrentAnimation(Prefabs[inst.prefab].death_anim[i]) then
-				BossCalendar:KilledMonster(Prefabs[inst.prefab].npc, npc)
-				return
-			end
-		end
+do
+	local prefabs =
+	{
+		"yellowgem", 
+		"hivehat", 
+		"shroom_skin",
+		"klaussackkey",
+		"blowdart_pipe",
+		"malbatross_beak",
+		"skeletonhat"
+	}
+	for i = 1, #prefabs do
+		AddPrefabPostInit(prefabs[i], function(inst)
+			inst:DoTaskInTime(0, function() BossCalendar:ValidateDeath(inst) end)
+		end)
 	end
-end
-
-for prefab in pairs(Prefabs) do
-	AddPrefabPostInit(prefab, function(inst)
-		inst:DoTaskInTime(0, ValidateDeath)
-	end)
 end
 
 local function CanToggle()
