@@ -1,15 +1,4 @@
-local OPEN_KEY = GetModConfigData("OPEN_KEY")
 local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
-local IGLOO_ICON_PATH = GetModConfigData("IGLOO_ICON_PATH")
-local MAP_ICONS_ENABLED = GetModConfigData("MAP_ICONS_ENABLED")
-local IGLOO_NUMBERS = GetModConfigData("IGLOO_NUMBERS")
-
--- Support for legacy code until the next game update
-if IGLOO_ICON_PATH == "iglobig" or IGLOO_ICON_PATH == "images/iglobig.xml" then
-	IGLOO_ICON_PATH = "images/igloobig.xml"
-elseif IGLOO_ICON_PATH == "iglo" or IGLOO_ICON_PATH == "images/iglo.xml" then
-	IGLOO_ICON_PATH = "images/igloo.xml"
-end
 
 local GLOBAL = GLOBAL
 local require, TheInput = GLOBAL.require, GLOBAL.TheInput
@@ -61,20 +50,21 @@ Assets =
 {
 	Asset("ATLAS", "images/skull.xml"),
 	Asset("ATLAS", "images/npcs.xml"),
-	Asset("ATLAS", IGLOO_ICON_PATH),
+	Asset("ATLAS", "images/igloo.xml"),
 }
-AddMinimapAtlas(IGLOO_ICON_PATH)
+AddMinimapAtlas("images/igloo.xml")
 
-if MAP_ICONS_ENABLED then
+
+if GetModConfigData("IGLOO_ICON") then
 	local function MapWidgetPostConstruct(self)
-		BossCalendar:AddMapIcons(self, IGLOO_ICON_PATH)
+		BossCalendar:AddMapIcons(self)
 	end
 
 	AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
 end
 
 local function WalrusCampPostInit(inst)
-	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, MAP_ICONS_ENABLED, IGLOO_ICON_PATH, IGLOO_NUMBERS)
+	inst:DoTaskInTime(0, BossCalendar.AddCamp, inst, IGLOO_ICON, IGLOO_NUMBERS)
 end
 AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
@@ -127,7 +117,9 @@ local function Close()
 	end
 end
 
-if OPEN_KEY then
+if GetModConfigData("OPEN_KEY") then
+	local OPEN_KEY = GetModConfigData("OPEN_KEY")
+
 	if TOGGLE_MODE then
 		TheInput:AddKeyUpHandler(OPEN_KEY, Display)
 	else
@@ -139,15 +131,7 @@ end
 local function Init(inst, recur)
 	if recur then
 		if inst == GLOBAL.ThePlayer then
-			BossCalendar:Init(
-			{
-				ReminderColor = GetModConfigData("REMINDER_COLOR"),
-				ReminderDuration = GetModConfigData("REMINDER_DURATION"),
-				CalendarUnits = GetModConfigData("CALENDAR_UNITS"),
-				AnnounceStyle = GetModConfigData("ANNOUNCE_STYLES"),
-				AnnounceUnits = GetModConfigData("ANNOUNCE_UNITS"),
-				NetworkNotifications = GetModConfigData("NETWORK_NOTIFICATIONS")
-			})
+			BossCalendar:Init()
 		end
 	else
 		inst:DoTaskInTime(0, Init, true)
@@ -156,3 +140,16 @@ end
 AddPlayerPostInit(Init)
 
 AddSimPostInit(BossCalendar.LoadIgloos)
+
+BossCalendar:SetSettings(
+	{
+		IGLOO_ICON = GetModConfigData("IGLOO_ICON"),
+		IGLOO_NUMBERS = GetModConfigData("IGLOO_NUMBERS"),
+		REMINDER_COLOR = GetModConfigData("REMINDER_COLOR"),
+		REMINDER_DURATION = GetModConfigData("REMINDER_DURATION"),
+		CALENDAR_UNITS = GetModConfigData("CALENDAR_UNITS"),
+		ANNOUNCE_STYLES = GetModConfigData("ANNOUNCE_STYLES"),
+		ANNOUNCE_UNITS = GetModConfigData("ANNOUNCE_UNITS"),
+		NETWORK_NOTIFICATIONS = GetModConfigData("NETWORK_NOTIFICATIONS")
+	}
+)

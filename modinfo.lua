@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.6"
+version = "2.7"
 
 forumthread = ""
 description = "Reminds you when the bosses YOU or OTHERS with this mod have killed respawn"
@@ -50,7 +50,7 @@ end
 local colors = {}
 local announce_styles = 
 {
-	{description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21." },
+	{description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21."},
 	{description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
 	{description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
 }
@@ -67,13 +67,13 @@ local boolunits =
 }
 local boolnohover = 
 {
-	{description = "Enabled", data = true },
+	{description = "Enabled", data = true},
 	{description = "Disabled", data = false}
 }
 local bool = 
 {
-	{description = "Toggle", data = true, hover = "Toggle: Press to open / close the Boss Calendar"},
-	{description = "Hold", data = false, hover = "Hold: Holding the key opens the Boss Calendar"}
+	{description = "Toggle", data = true, hover = "Press the keybind to toggle between opening/closing the Boss Calendar"},
+	{description = "Hold", data = false, hover = "The Boss Calendar is only opened while you are holding the keybind"}
 }
 local keyslist = 
 {
@@ -81,8 +81,8 @@ local keyslist =
 }
 local icons = 
 {
-	{description = "Big", data = "images/igloobig.xml"},
-	{description = "Small", data = "images/igloo.xml"}
+	{description = "Enabled", data = "igloo"},
+	{description = "Disabled", data = false}
 }
 
 for i = 1, #COLORNAMES do
@@ -103,13 +103,12 @@ configuration_options =
 	AddSectionTitle("Keybinds"),
 	AddConfig("Open key", "OPEN_KEY", keyslist, 118, "Assign a key"),
 	AddSectionTitle("Settings"),
-	AddConfig("Open mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
+	AddConfig("Opening mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
 	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
 	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
 	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Long / Default / Short"),
-	AddConfig("Map icon size", "IGLOO_ICON_PATH", icons, "images/igloobig.xml", "Big / Small"),
-	AddConfig("Map icons", "MAP_ICONS_ENABLED", boolnohover, true, "Igloo map icons have numbers"),
-	AddConfig("Igloo numbering", "IGLOO_NUMBERS", boolnohover, true, "Igloos display their number above them"),
+	AddConfig("Map icons", "IGLOO_ICON", icons, "igloo", "Enabled / Disabled"),
+	AddConfig("Igloo numbers", "IGLOO_NUMBERS", boolnohover, true, "MacTusk camps display their number above them"),
 	AddSectionTitle("Extra Settings"),
 	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Days / Time"),
 	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Days / Time"),

@@ -4,12 +4,8 @@ local Text = require "widgets/text"
 local Image = require "widgets/image"
 local PersistentData = require("persistentdata")
 local PersistentMapIcons = require("widgets/persistentmapicons")
-local StatusAnnouncer = require("announcer")()
+local Announcer = require("bosscalendar_announcer")()
 local IsValidJson = require "validJson"
-
-local function RGB(r, g, b)
-	return {r / 255, g / 255, b / 255, 1}
-end
 
 local BossCalendar = Class(Screen)
 local DataContainer = PersistentData("BossCalendar")
@@ -25,25 +21,6 @@ local Npcs =
 	"Dragonfly", "Bee Queen", "Toadstool", "Malbatross", 
 	"Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", 
 	"MacTusk IV", "Klaus"
-}
-local ColorToRGB = 
-{
-	White				= RGB(255, 255 ,255),
-	Red 				= RGB(255, 0, 0),
-	Green				= RGB(0, 255, 0),
-	Blue				= RGB(0, 0, 255),
-	Yellow				= RGB(255, 255, 0),
-	Crimsom				= RGB(220, 20, 60),
-	Coral				= RGB(255, 127, 80),
-	Orange				= RGB(255, 165, 0),
-	Khaki				= RGB(240, 230, 140),
-	Chocolate			= RGB(210, 105, 30),
-	Brown				= RGB(165, 42, 42),
-	["Light Green"]			= RGB(144, 238, 144),
-	Cyan				= RGB(0, 255, 255),
-	["Light Blue"]			= RGB(173, 216, 230),
-	Purple				= RGB(128, 0, 128),
-	Pink				= RGB(255, 192, 203)
 }
 local Session, Sayfn
 
@@ -108,7 +85,7 @@ function BossCalendar:Say(message, time)
 	end
 	self.talking = true
 	ThePlayer.components.talker.lineduration = time
-	ThePlayer.components.talker:Say(message, time, 0, true, false, Settings.ReminderColor)
+	ThePlayer.components.talker:Say(message, time, 0, true, false, Settings.REMINDER_COLOR)
 	ThePlayer.components.talker.Say = function() end
 	ThePlayer:DoTaskInTime(time, function()
 		ThePlayer.components.talker.lineduration = 2.5
@@ -126,18 +103,19 @@ local function OnTimerDone(inst, data)
 		return 
 	end 
 
-	BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.ReminderDuration)
+	BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.REMINDER_DURATION)
 end
 
 ---
 --- Map icons / igloo
 ---
 
-function BossCalendar:AddMapIcons(widget, iconPath)
+function BossCalendar:AddMapIcons(widget)
 	widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
 	for i = 1, #WalrusCamps do
-		widget.camp_icons:AddMapIcon(iconPath, iconPath:match("%igloo%a*").."_"..i..".tex", WalrusCamps[i])
+		print(string.format("%s%s.tex", Settings.IGLOO_ICON, i))
+		widget.camp_icons:AddMapIcon(string.format("images/%s.xml", Settings.IGLOO_ICON), string.format("%s%s.tex", Settings.IGLOO_ICON, i), WalrusCamps[i])
 	end
 end
 
@@ -174,12 +152,12 @@ local function InsertCamp(pos)
 	return GetCampNumber(pos)
 end
 
-function BossCalendar:AddCamp(inst, mapIconsEnabled, iglooIconPath, iglooNumbering)
+function BossCalendar:AddCamp(inst)
 	if inst and inst:IsValid() then
 		local ceilVector = CeilVector(inst:GetPosition())
 		local iglooNumber = GetCampNumber(ceilVector) or InsertCamp(ceilVector)
 
-		if iglooNumbering then
+		if Settings.IGLOO_NUMBERS then
 			inst.entity:AddLabel()
 			inst.Label:SetFont(CHATFONT_OUTLINE)
 			inst.Label:SetFontSize(35)
@@ -188,8 +166,8 @@ function BossCalendar:AddCamp(inst, mapIconsEnabled, iglooIconPath, iglooNumberi
 			inst.Label:Enable(true)
 		end
 
-		if mapIconsEnabled then
-			inst.MiniMapEntity:SetIcon(string.format("%s_%s.tex", iglooIconPath:match("%igloo%a*"), iglooNumber))
+		if Settings.IGLOO_ICON then
+			inst.MiniMapEntity:SetIcon(string.format("%s%s.tex", Settings.IGLOO_ICON, iglooNumber))
 		end
 	end
 end
@@ -197,6 +175,37 @@ end
 ---
 --- Initialisation
 ---
+
+function BossCalendar:SetSettings(settings)
+	local function RGB(r, g, b)
+		return {r / 255, g / 255, b / 255, 1}
+	end
+
+	local ColorToRGB = 
+	{
+		White				= RGB(255, 255 ,255),
+		Red 				= RGB(255, 0, 0),
+		Green				= RGB(0, 255, 0),
+		Blue				= RGB(0, 0, 255),
+		Yellow				= RGB(255, 255, 0),
+		Crimsom				= RGB(220, 20, 60),
+		Coral				= RGB(255, 127, 80),
+		Orange				= RGB(255, 165, 0),
+		Khaki				= RGB(240, 230, 140),
+		Chocolate			= RGB(210, 105, 30),
+		Brown				= RGB(165, 42, 42),
+		["Light Green"]			= RGB(144, 238, 144),
+		Cyan				= RGB(0, 255, 255),
+		["Light Blue"]			= RGB(173, 216, 230),
+		Purple				= RGB(128, 0, 128),
+		Pink				= RGB(255, 192, 203)
+	}
+
+	Settings = settings
+	Settings.IGLOO_ICON = "igloo"
+	Settings.REMINDER_COLOR = ColorToRGB[Settings.REMINDER_COLOR]
+	Settings.ANNOUNCE_STYLES = Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")] or self.AnnounceTime
+end
 
 function BossCalendar:LoadIgloos()
 	DataContainer:Load()
@@ -252,11 +261,7 @@ function BossCalendar:Setup()
 	self.init = true
 end
 
-function BossCalendar:Init(settings)
-	Settings = settings
-	Settings.ReminderColor = ColorToRGB[Settings.ReminderColor]
-	Settings.AnnounceStyle = Settings.AnnounceUnits and self["Announce"..tostring(Settings.AnnounceStyle):gsub("%.", "_")] or self.AnnounceTime
-
+function BossCalendar:Init()
 	Sayfn = ThePlayer.components.talker.Say
 	ThePlayer:AddComponent("timer")
 	ThePlayer:ListenForEvent("timerdone", OnTimerDone)
@@ -323,7 +328,7 @@ function BossCalendar:NetworkBossKilled(data)
 		self:Save()
 		
 		local doer = NetworkData["player"]
-		if Settings.NetworkNotifications and ShouldNotify(NetworkData["camp"]) then
+		if Settings.NETWORK_NOTIFICATIONS and ShouldNotify(NetworkData["camp"]) then
 			self:Say(string.format("%s has just killed %s.", doer, npc), 3)
 		end
 	end
@@ -479,7 +484,7 @@ function BossCalendar:OnAnnounce(npc)
 		announcement = self:AnnounceDeaths(npc)
 	end	
 
-	StatusAnnouncer:Announce(announcement, npc)
+	Announcer:Announce(announcement, npc)
 end
 
 function BossCalendar:AnnounceToKill(npc)
@@ -542,7 +547,7 @@ function BossCalendar:Get_timer(npc, img)
 	if self.trackers[npc][self.mode] then
 		self[img]:SetTint(0,0,0,1)
 		self[npc]:SetColour(1,0,0,1)
-		str = 	Settings.CalendarUnits and SecondsToDays(self.trackers[npc][self.mode]).."d" or
+		str = 	Settings.CALENDAR_UNITS and SecondsToDays(self.trackers[npc][self.mode]).."d" or
 				SecondsToTime(self.trackers[npc][self.mode])
 	else
 		self[img]:SetTint(1,1,1,1)
@@ -671,17 +676,16 @@ function BossCalendar:Open()
 
 	for i = 1, #Npcs do
 		local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
-
-		self[Npcs[i]] = self.root:AddChild(Text(UIFONT, 25))
-		self[Npcs[i]]:SetPosition(x, y + 140)
-		self[Npcs[i]]:SetString(Npcs[i])
-
-		self[NpcImages[i]] = self.root:AddChild(Image("images/npcs.xml", Npcs[i]:trim()..".tex"))
-		self[NpcImages[i]]:SetSize(68, 68)
-		self[NpcImages[i]]:SetPosition(x, y + 95)
-		self[NpcImages[i]].OnMouseButton = function(_, button, down) 
-			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and StatusAnnouncer:CanAnnounce(Npcs[i]:trim()) then
-				self:OnAnnounce(Npcs[i])
+		local npc, img = Npcs[i], NpcImages[i]
+		self[npc] = self.root:AddChild(Text(UIFONT, 25))
+		self[npc]:SetPosition(x, y + 140)
+		self[npc]:SetString(npc)
+		self[img] = self.root:AddChild(Image("images/npcs.xml", npc:trim()..".tex"))
+		self[img]:SetSize(68, 68)
+		self[img]:SetPosition(x, y + 95)
+		self[img].OnMouseButton = function(_, button, down) 
+			if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and Announcer:CanAnnounce(npc:trim()) then
+				self:OnAnnounce(npc)
 			end
 		end
 	end
