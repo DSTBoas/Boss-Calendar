@@ -44,12 +44,10 @@ do
 end
 
 local function CanToggle()
-	if	TheFrontEnd and 
-		TheFrontEnd:GetActiveScreen() and 
-		TheFrontEnd:GetActiveScreen().name then 
-		return TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar"
-	end
-	return
+	return 	TheFrontEnd and
+			TheFrontEnd:GetActiveScreen() and
+			TheFrontEnd:GetActiveScreen().name and 
+			(TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
 end
 
 local function Display()
