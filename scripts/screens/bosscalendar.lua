@@ -156,7 +156,6 @@ function BossCalendar:AddMapIcons(widget)
     widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
     for i = 1, #WalrusCamps do
-        print(string.format("%s%s.tex", Settings.IGLOO_ICON, i))
         widget.camp_icons:AddMapIcon(string.format("images/%s.xml", Settings.IGLOO_ICON), string.format("%s%s.tex", Settings.IGLOO_ICON, i), WalrusCamps[i])
     end
 end
