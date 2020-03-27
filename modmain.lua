@@ -1,8 +1,5 @@
-local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
-
 local GLOBAL = GLOBAL
-local require, TheInput = GLOBAL.require, GLOBAL.TheInput
-local BossCalendar = require("screens/bosscalendar")
+local BossCalendar = GLOBAL.require("screens/bosscalendar")
 
 Assets = 
 {
@@ -42,31 +39,31 @@ do
     end
 end
 
-local function CanToggle()
-    return  TheFrontEnd and
-            TheFrontEnd:GetActiveScreen() and
-            TheFrontEnd:GetActiveScreen().name and 
-            (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
-end
+if GetModConfigData("OPEN_KEY") then
+    local OPEN_KEY, TOGGLE_MODE, TheInput = GetModConfigData("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
+    
+    local function CanToggle()
+        return  TheFrontEnd and
+                TheFrontEnd:GetActiveScreen() and
+                TheFrontEnd:GetActiveScreen().name and 
+                (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
+    end
 
-local function Display()
-    if CanToggle() then
-        if BossCalendar:Open() then 
-            TheFrontEnd:PushScreen(BossCalendar)
-        elseif TOGGLE_MODE then
+    local function Display()
+        if CanToggle() then
+            if BossCalendar:Open() then 
+                TheFrontEnd:PushScreen(BossCalendar)
+            elseif TOGGLE_MODE then
+                BossCalendar:Close()
+            end
+        end
+    end
+
+    local function Close()
+        if CanToggle() then
             BossCalendar:Close()
         end
     end
-end
-
-local function Close()
-    if CanToggle() then
-        BossCalendar:Close()
-    end
-end
-
-if GetModConfigData("OPEN_KEY") then
-    local OPEN_KEY = GetModConfigData("OPEN_KEY")
 
     if TOGGLE_MODE then
         TheInput:AddKeyUpHandler(OPEN_KEY, Display)
