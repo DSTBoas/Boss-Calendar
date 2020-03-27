@@ -41,16 +41,16 @@ end
 
 if GetModConfigData("OPEN_KEY") then
     local OPEN_KEY, TOGGLE_MODE, TheInput = GetModConfigData("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
-    
-    local function CanToggle()
+
+    local function canToggle()
         return  TheFrontEnd and
                 TheFrontEnd:GetActiveScreen() and
                 TheFrontEnd:GetActiveScreen().name and 
                 (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
     end
 
-    local function Display()
-        if CanToggle() then
+    local function displayCalendar()
+        if canToggle() then
             if BossCalendar:Open() then 
                 TheFrontEnd:PushScreen(BossCalendar)
             elseif TOGGLE_MODE then
@@ -59,17 +59,17 @@ if GetModConfigData("OPEN_KEY") then
         end
     end
 
-    local function Close()
-        if CanToggle() then
+    local function closeCalendar()
+        if canToggle() then
             BossCalendar:Close()
         end
     end
 
     if TOGGLE_MODE then
-        TheInput:AddKeyUpHandler(OPEN_KEY, Display)
+        TheInput:AddKeyUpHandler(OPEN_KEY, displayCalendar)
     else
-        TheInput:AddKeyDownHandler(OPEN_KEY, Display)
-        TheInput:AddKeyUpHandler(OPEN_KEY, Close)
+        TheInput:AddKeyDownHandler(OPEN_KEY, displayCalendar)
+        TheInput:AddKeyUpHandler(OPEN_KEY, closeCalendar)
     end
 end
 
