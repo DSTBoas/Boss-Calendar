@@ -245,6 +245,7 @@ function BossCalendar:SetSettings(settings)
     Settings = settings
     Settings.IGLOO_ICON = "igloo"
     Settings.REMINDER_COLOR = ColorToRGB[Settings.REMINDER_COLOR]
+    print(Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")] or self.AnnounceTime)
     Settings.ANNOUNCE_STYLES = Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")] or self.AnnounceTime
 end
 
@@ -537,7 +538,7 @@ function BossCalendar:OnAnnounce(npc)
     
     if self.mode == "timer" then
         if self.trackers[npc]["timer"] then
-            announcement = Settings.AnnounceStyle(self, npc)
+            announcement = Settings.ANNOUNCE_STYLES(self, npc)
         else
             announcement = self:AnnounceToKill(npc)
         end
