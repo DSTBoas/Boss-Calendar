@@ -5,12 +5,11 @@ local Image = require "widgets/image"
 local PersistentData = require("persistentdata")
 local PersistentMapIcons = require("widgets/persistentmapicons")
 local Announcer = require("bosscalendar_announcer")()
-local IsValidJson = require "validJson"
 
 local BossCalendar = Class(Screen)
 local DataContainer = PersistentData("BossCalendar")
 local WalrusCamps, Settings, NpcImages = {}, {}, {}
-local RespawnDurations = 
+local RespawnDurations =
 {
     toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
     stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
@@ -316,80 +315,6 @@ function BossCalendar:Init(inst)
 end
 
 ---
---- Networking 
----
-
-local NetworkData = {}
-
-local function DataPack(npc, timer, player, camp)
-    NetworkData["npc"] = npc
-    NetworkData["timer"] = timer
-    NetworkData["player"] = player
-    NetworkData["camp"] = camp
-    return json.encode(NetworkData)
-end
-
-local function DataUnpack(data)
-    if IsValidJson(data) then
-        NetworkData = json.decode(data)
-        return (NetworkData["npc"] and NetworkData["timer"] and NetworkData["player"] and NetworkData["camp"])
-    end
-    return
-end
-
-local function NetworkWalrus(campPosition)
-    if #WalrusCamps == 0 then 
-        return 
-    end
-
-    local closest_camp = GetClosestCamp(Vector3(campPosition.x, campPosition.y, campPosition.z))
-
-    return GetTableName(closest_camp)
-end
-
-local function ShouldNotify(campPosition)
-    local pos = Vector3(campPosition.x, campPosition.y, campPosition.z)
-    local playerVector = Vector3(ThePlayer.Transform:GetWorldPosition())
-    return pos:Dist(playerVector) > 30
-end
-
-function BossCalendar:NetworkBossKilled(data)
-    if not DataUnpack(data) then 
-        return 
-    end
-    
-    local npc = NetworkData["npc"]
-    if npc:trim() == "MacTusk" then
-        npc = NetworkWalrus(NetworkData["camp"])
-        if not npc then 
-            return 
-        end
-    end
-    
-    if npc and not self.trackers[npc]["timer"] then
-        self.trackers[npc]["timer"] = NetworkData["timer"]
-        ThePlayer.components.timer:StartTimer(npc, self.trackers[npc]["timer"])
-        self:Save()
-        
-        local doer = NetworkData["player"]
-        if Settings.NETWORK_NOTIFICATIONS and ShouldNotify(NetworkData["camp"]) then
-            self:Say(string.format("%s has just killed %s.", doer, npc), 3)
-        end
-    end
-end
-
-local _Networking_Say = Networking_Say
-Networking_Say = function(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
-    if string.sub(message, 1, 6) == "{BSSC}" then
-        if userid ~= ThePlayer.userid then
-            ThePlayer:DoTaskInTime(.1, function() BossCalendar:NetworkBossKilled(message:sub(7)) end)
-        end
-    else
-        _Networking_Say(guid, userid, name, prefab, message, colour, whisper, isemote, user_vanity)
-    end
-end
-
----
 --- General
 ---
 
@@ -491,10 +416,6 @@ function BossCalendar:KilledMonster(npc, inst)
             ThePlayer.components.timer:StartTimer(npc, respawnTime)
             self:AddKill(npc)
             self:Save()
-
-            -- Networking
-            local query = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
-            TheNet:Say(query, true, true)
         end
     end
 end
@@ -503,7 +424,7 @@ end
 --- Announce
 ---
 
-local NpcToObject = 
+local NpcToObject =
 {
     ["Bee Queen"] = "Gigantic Beehive",
     MacTusk = "Walrus Camp",

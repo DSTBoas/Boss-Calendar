@@ -1,10 +1,10 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.7"
+version = "2.8"
 
 forumthread = ""
-description = "Reminds you when the bosses YOU or OTHERS with this mod have killed respawn"
+description = "Reminds you when bosses respawn"
 
 api_version = 10
 
@@ -22,95 +22,94 @@ server_filter_tags = {}
 
 local COLORNAMES = 
 {
-	"White",
-	"Red",
-	"Coral",
-	"Orange",
-	"Yellow",
-	"Khaki",
-	"Chocolate",
-	"Brown",
-	"Green",
-	"Light Green",
-	"Cyan",
-	"Blue",
-	"Light Blue",
-	"Purple",
-	"Pink"
+    "White",
+    "Red",
+    "Coral",
+    "Orange",
+    "Yellow",
+    "Khaki",
+    "Chocolate",
+    "Brown",
+    "Green",
+    "Light Green",
+    "Cyan",
+    "Blue",
+    "Light Blue",
+    "Purple",
+    "Pink"
 }
 
 local function AddConfig(label, name, options, default, hover)
-	return {label = label, name = name, options = options, default = default, hover = hover or ""}
+    return {label = label, name = name, options = options, default = default, hover = hover or ""}
 end
 
 local function AddSectionTitle(title)
-	return AddConfig(title, "", {{description = "", data = 0}}, 0)
+    return AddConfig(title, "", {{description = "", data = 0}}, 0)
 end
 
 local colors = {}
 local announce_styles = 
 {
-	{description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21."},
-	{description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
-	{description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
+    {description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21."},
+    {description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
+    {description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
 }
 local say_duration = 
 {
-	{description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
-	{description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
-	{description = "Short", data = 3, hover = "Reminders last for 3 seconds"}
+    {description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
+    {description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
+    {description = "Short", data = 3, hover = "Reminders last for 3 seconds"}
 }
 local boolunits = 
 {
-	{description = "Days", data = true},
-	{description = "Time", data = false}
+    {description = "Days", data = true},
+    {description = "Time", data = false}
 }
 local boolnohover = 
 {
-	{description = "Enabled", data = true},
-	{description = "Disabled", data = false}
+    {description = "Enabled", data = true},
+    {description = "Disabled", data = false}
 }
 local bool = 
 {
-	{description = "Toggle", data = true, hover = "Press the keybind to toggle between opening/closing the Boss Calendar"},
-	{description = "Hold", data = false, hover = "The Boss Calendar is only opened while you are holding the keybind"}
+    {description = "Toggle", data = true, hover = "Press the keybind to toggle between opening/closing the Boss Calendar"},
+    {description = "Hold", data = false, hover = "The Boss Calendar is only opened while you are holding the keybind"}
 }
 local keyslist = 
 {
-	{description = "Disabled", data = false}
+    {description = "Disabled", data = false}
 }
 local icons = 
 {
-	{description = "Enabled", data = "igloo"},
-	{description = "Disabled", data = false}
+    {description = "Enabled", data = "igloo"},
+    {description = "Disabled", data = false}
 }
 
 for i = 1, #COLORNAMES do
-	colors[i] = {description = COLORNAMES[i], data = COLORNAMES[i]}
+    colors[i] = {description = COLORNAMES[i], data = COLORNAMES[i]}
 end
 
 local string = ""
 for i = 1, 26 do
-	local ch = string.format("%c", 64 + i)
-	keyslist[i + 1] = {description = ch, data = ch:lower():byte()}
-	if i < 13 then
-		keyslist[27 + i] = {description = "F"..i, data = 281 + i}
-	end
+    local ch = string.format("%c", 64 + i)
+    keyslist[i + 1] = {description = ch, data = ch:lower():byte()}
+    if i < 13 then
+        keyslist[27 + i] = {description = "F"..i, data = 281 + i}
+    end
 end
 
 configuration_options = 
 {
-	AddSectionTitle("Keybinds"),
-	AddConfig("Open key", "OPEN_KEY", keyslist, 118, "Assign a key"),
-	AddSectionTitle("Settings"),
-	AddConfig("Opening mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
-	AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
-	AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
-	AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Long / Default / Short"),
-	AddConfig("Map icons", "IGLOO_ICON", icons, "igloo", "Enabled / Disabled"),
-	AddConfig("Igloo numbers", "IGLOO_NUMBERS", boolnohover, true, "MacTusk camps display their number above them"),
-	AddSectionTitle("Extra Settings"),
-	AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Days / Time"),
-	AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Days / Time"),
-	AddConfig("Network notifications", "NETWORK_NOTIFICATIONS", boolnohover, true, "Enabled / Disabled"),
+    AddSectionTitle("Keybinds"),
+    AddConfig("Open key", "OPEN_KEY", keyslist, 118, "Assign a key"),
+    AddSectionTitle("Settings"),
+    AddConfig("Opening mode", "TOGGLE_MODE", bool, true, "Toggle / Hold"),
+    AddConfig("Announce style", "ANNOUNCE_STYLES", announce_styles, 1, "Choose a style"),
+    AddConfig("Reminder color", "REMINDER_COLOR", colors, "Green", "Choose a color"),
+    AddConfig("Reminder duration", "REMINDER_DURATION", say_duration, 5, "Long / Default / Short"),
+    AddConfig("Map icons", "IGLOO_ICON", icons, "igloo", "Enabled / Disabled"),
+    AddConfig("Igloo numbers", "IGLOO_NUMBERS", boolnohover, true, "MacTusk camps display their number above them"),
+    AddSectionTitle("Advanced Settings"),
+    AddConfig("Boss Calendar time units", "CALENDAR_UNITS", boolunits, true, "Days / Time"),
+    AddConfig("Announce time units", "ANNOUNCE_UNITS", boolunits, true, "Days / Time"),
 }
