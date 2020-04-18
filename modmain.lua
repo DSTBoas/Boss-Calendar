@@ -1,7 +1,7 @@
 local GLOBAL = GLOBAL
 local BossCalendar = GLOBAL.require("screens/bosscalendar")
 
-Assets = 
+Assets =
 {
     Asset("ATLAS", "images/skull.xml"),
     Asset("ATLAS", "images/npcs.xml"),
@@ -24,8 +24,8 @@ AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 do
     local prefabs =
     {
-        "yellowgem", 
-        "hivehat", 
+        "yellowgem",
+        "hivehat",
         "shroom_skin",
         "klaussackkey",
         "blowdart_pipe",
@@ -43,15 +43,15 @@ if GetModConfigData("OPEN_KEY") then
     local OPEN_KEY, TOGGLE_MODE, TheInput = GetModConfigData("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
 
     local function canToggle()
-        return  TheFrontEnd and
-                TheFrontEnd:GetActiveScreen() and
-                TheFrontEnd:GetActiveScreen().name and 
-                (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
+        return TheFrontEnd
+           and TheFrontEnd:GetActiveScreen()
+           and TheFrontEnd:GetActiveScreen().name
+           and (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
     end
 
     local function displayCalendar()
         if canToggle() then
-            if BossCalendar:Open() then 
+            if BossCalendar:Open() then
                 TheFrontEnd:PushScreen(BossCalendar)
             elseif TOGGLE_MODE then
                 BossCalendar:Close()
