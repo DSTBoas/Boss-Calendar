@@ -89,6 +89,5 @@ BossCalendar:SetSettings(
         CALENDAR_UNITS = GetModConfigData("CALENDAR_UNITS"),
         ANNOUNCE_STYLES = GetModConfigData("ANNOUNCE_STYLES"),
         ANNOUNCE_UNITS = GetModConfigData("ANNOUNCE_UNITS"),
-        NETWORK_NOTIFICATIONS = GetModConfigData("NETWORK_NOTIFICATIONS")
     }
 )
