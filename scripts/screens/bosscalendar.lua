@@ -221,7 +221,7 @@ function BossCalendar:SetSettings(settings)
         return {r / 255, g / 255, b / 255, 1}
     end
 
-    local ColorToRGB = 
+    local ColorToRGB =
     {
         White               = RGB(255, 255 ,255),
         Red                 = RGB(255, 0, 0),
@@ -234,18 +234,21 @@ function BossCalendar:SetSettings(settings)
         Khaki               = RGB(240, 230, 140),
         Chocolate           = RGB(210, 105, 30),
         Brown               = RGB(165, 42, 42),
-        ["Light Green"]         = RGB(144, 238, 144),
+        ["Light Green"]     = RGB(144, 238, 144),
         Cyan                = RGB(0, 255, 255),
-        ["Light Blue"]          = RGB(173, 216, 230),
+        ["Light Blue"]      = RGB(173, 216, 230),
         Purple              = RGB(128, 0, 128),
         Pink                = RGB(255, 192, 203)
     }
 
     Settings = settings
+
+    -- Legacy support
     Settings.IGLOO_ICON = "igloo"
+
     Settings.REMINDER_COLOR = ColorToRGB[Settings.REMINDER_COLOR]
-    print(Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")] or self.AnnounceTime)
-    Settings.ANNOUNCE_STYLES = Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")] or self.AnnounceTime
+    Settings.ANNOUNCE_STYLES = Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")]
+                               or self.AnnounceTime
 end
 
 function BossCalendar:LoadIgloos()

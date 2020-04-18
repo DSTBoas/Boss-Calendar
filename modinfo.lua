@@ -1,7 +1,7 @@
 name = "Boss Calendar"
 
 author = "Boas"
-version = "2.8"
+version = "2.9"
 
 forumthread = ""
 description = "Reminds you when bosses respawn"
@@ -20,7 +20,7 @@ all_clients_require_mod = false
 client_only_mod = true
 server_filter_tags = {}
 
-local COLORNAMES = 
+local COLORNAMES =
 {
     "White",
     "Red",
@@ -48,38 +48,38 @@ local function AddSectionTitle(title)
 end
 
 local colors = {}
-local announce_styles = 
+local announce_styles =
 {
     {description = "Style 1", data = 1, hover = "Example: Dragonfly respawns on day 21."},
     {description = "Style 2", data = 2, hover = "Example: Dragonfly respawns in 20 days."},
     {description = "Style 2.5", data = 2.5, hover = "Example: Dragonfly respawns in 19.9 days."}
 }
-local say_duration = 
+local say_duration =
 {
     {description = "Long", data = 7, hover = "Reminders last for 7 seconds"},
     {description = "Default", data = 5, hover = "Reminders last for 5 seconds"},
     {description = "Short", data = 3, hover = "Reminders last for 3 seconds"}
 }
-local boolunits = 
+local boolunits =
 {
     {description = "Days", data = true},
     {description = "Time", data = false}
 }
-local boolnohover = 
+local boolnohover =
 {
     {description = "Enabled", data = true},
     {description = "Disabled", data = false}
 }
-local bool = 
+local bool =
 {
     {description = "Toggle", data = true, hover = "Press the keybind to toggle between opening/closing the Boss Calendar"},
     {description = "Hold", data = false, hover = "The Boss Calendar is only opened while you are holding the keybind"}
 }
-local keyslist = 
+local keyslist =
 {
     {description = "Disabled", data = false}
 }
-local icons = 
+local icons =
 {
     {description = "Enabled", data = "igloo"},
     {description = "Disabled", data = false}
@@ -98,7 +98,7 @@ for i = 1, 26 do
     end
 end
 
-configuration_options = 
+configuration_options =
 {
     AddSectionTitle("Keybinds"),
     AddConfig("Open key", "OPEN_KEY", keyslist, 118, "Assign a key"),
