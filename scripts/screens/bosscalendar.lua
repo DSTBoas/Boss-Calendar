@@ -494,7 +494,7 @@ function BossCalendar:KilledMonster(npc, inst)
 
             -- Networking
             local query = "{BSSC}"..DataPack(npc, serverRespawnTime, ThePlayer.name, CeilVector(inst:GetPosition()))
-            TheNet:Say(query, false, true)
+            TheNet:Say(query, true, true)
         end
     end
 end
