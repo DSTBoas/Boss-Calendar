@@ -44,7 +44,7 @@ if GetModConfigData("OPEN_KEY") then
 
     local function canToggle()
         return TheFrontEnd
-           and TheFrontEnd:GetActiveScreen()
+           and TheFrontEnd.GetActiveScreen
            and TheFrontEnd:GetActiveScreen().name
            and (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
     end
