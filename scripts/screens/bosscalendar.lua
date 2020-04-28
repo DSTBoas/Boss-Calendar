@@ -47,7 +47,7 @@ local DeathAnimations =
         npc = "Malbatross",
         death_anim =
         {
-            "death_ocean", 
+            "death_ocean",
             "death"
         }
     },
@@ -55,13 +55,21 @@ local DeathAnimations =
     {
         npc = "Fuelweaver",
         death_anim = {"death3"}
+    },
+    singingshell_octave5 =
+    {
+        npc = "Crab King",
+        death_anim = {"death2"}
     }
 }
 local Npcs = 
 {   
-    "Dragonfly", "Bee Queen", "Toadstool", "Malbatross", 
-    "Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III", 
-    "MacTusk IV", "Klaus"
+    "Dragonfly", "Bee Queen", "Toadstool", "Malbatross",
+    "Fuelweaver", "MacTusk", "MacTusk II", "MacTusk III",
+    "MacTusk IV", "Crab King",
+
+    -- Winterfeast
+    "Klaus"
 }
 local Session, Sayfn
 
@@ -323,7 +331,7 @@ end
 
 local function GetNpc(inst)
     local x, y, z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus"})
+    local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus", "crabking"})
     return ents[1]
 end
 
@@ -333,7 +341,7 @@ function BossCalendar:ValidateDeath(inst)
         for i = 1, #DeathAnimations[inst.prefab].death_anim do
             if npc.AnimState:IsCurrentAnimation(DeathAnimations[inst.prefab].death_anim[i]) then
                 self:KilledMonster(DeathAnimations[inst.prefab].npc, npc)
-                return
+                break
             end
         end
     end
@@ -380,7 +388,7 @@ local function GetRespawnTime(inst)
     if RespawnDurations[inst.prefab] then
         respawnTime = RespawnDurations[inst.prefab]
     elseif TUNING[instName.."_RESPAWN_TIME"] then
-        respawnTime = TUNING[instName.."_RESPAWN_TIME"] 
+        respawnTime = TUNING[instName.."_RESPAWN_TIME"]
     elseif TUNING[instName.."_REGEN_PERIOD"] then
         respawnTime = TUNING[instName.."_REGEN_PERIOD"]
     end
@@ -435,13 +443,13 @@ local NpcToObject =
 }
 
 local function IsNearby(npc)
-    if NpcToObject[npc] then 
+    if NpcToObject[npc] then
         npc = NpcToObject[npc]
     end
 
     local x, y, z = ThePlayer.Transform:GetWorldPosition()
     local ents = TheSim:FindEntities(x, y, z, 30, 0, 
-        {"lava", "tree", "FX", "NOCLICK", "DECOR", "INLIMBO", "burnt", "boulder", "structure"}, 
+        {"lava", "tree", "FX", "NOCLICK", "DECOR", "INLIMBO", "burnt", "boulder", "structure"},
         {"stargate", "epic", "blocker", "antlion_sinkhole_blocker"}
     )
 
@@ -454,12 +462,12 @@ local function IsNearby(npc)
         end
     end
 
-    return
+    return false
 end
 
 function BossCalendar:OnAnnounce(npc)
     local announcement = ""
-    
+
     if self.mode == "timer" then
         if self.trackers[npc]["timer"] then
             announcement = Settings.ANNOUNCE_STYLES(self, npc)
@@ -468,15 +476,14 @@ function BossCalendar:OnAnnounce(npc)
         end
     elseif self.mode == "deaths" then
         announcement = self:AnnounceDeaths(npc)
-    end 
+    end
 
     Announcer:Announce(announcement, npc)
 end
 
 function BossCalendar:AnnounceToKill(npc)
-    return  
-        IsNearby(npc:trim()) and string.format("I am at %s.", npc) or
-        string.format("Let's kill %s.", npc)
+    return IsNearby(npc:trim()) and string.format("I am at %s.", npc) 
+        or string.format("Let's kill %s.", npc)
 end
 
 function BossCalendar:GetTotalMacTuskKilled()
@@ -493,10 +500,9 @@ end
 
 function BossCalendar:AnnounceDeaths(npc)
     local amountOfKills = npc == "MacTusk" and self:GetTotalMacTuskKilled() or self.trackers[npc]["deaths"]
-    return      
-        amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills) or
-        amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills) or
-        string.format("I haven't killed %s yet.", npc)
+    return amountOfKills > 1 and string.format("I killed %s %d times.", npc, amountOfKills)
+        or amountOfKills == 1 and string.format("I killed %s.", npc, amountOfKills)
+        or string.format("I haven't killed %s yet.", npc)
 end
 
 function BossCalendar:AnnounceTime(npc)
@@ -513,9 +519,8 @@ end
 function BossCalendar:Announce2(npc)
     local respawnDay = SecondsToDays(self.trackers[npc]["timer"])
     local plural = tonumber(respawnDay) > 1 and "days" or "day"
-    return
-        tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc) or 
-        string.format("%s respawns in %d %s.", npc, respawnDay, plural)
+    return tonumber(respawnDay) <= 1 and string.format("%s respawns today.", npc)
+        or string.format("%s respawns in %d %s.", npc, respawnDay, plural)
 end
 
 function BossCalendar:Announce2_5(npc)
@@ -533,8 +538,8 @@ function BossCalendar:Get_timer(npc, img)
     if self.trackers[npc][self.mode] then
         self[img]:SetTint(0,0,0,1)
         self[npc]:SetColour(1,0,0,1)
-        str =   Settings.CALENDAR_UNITS and SecondsToDays(self.trackers[npc][self.mode]).."d" or
-                SecondsToTime(self.trackers[npc][self.mode])
+        str = Settings.CALENDAR_UNITS and SecondsToDays(self.trackers[npc][self.mode]).."d" 
+              or SecondsToTime(self.trackers[npc][self.mode])
     else
         self[img]:SetTint(1,1,1,1)
         self[npc]:SetColour(1,1,1,1)
@@ -551,8 +556,8 @@ function BossCalendar:Get_deaths(npc, img)
 end
 
 function BossCalendar:Update()
-    if not self.open or not self.init then 
-        return 
+    if not self.open or not self.init then
+        return
     end
 
     for i = 1, #Npcs do
@@ -560,28 +565,28 @@ function BossCalendar:Update()
     end
 end
 
+local function GetNewPosition(self, npc)
+    local count = 0
+    for i = 1, #Npcs do
+        if self[Npcs[i]]:IsVisible() then
+            count = count + 1
+        end
+        if Npcs[i] == npc then
+            break
+        end
+    end
+    return (count - 1) % 5 * 120 - 255, math.floor((count- 1) / 5) * -130
+end
+
+local function UpdatePosition(self, npc)
+    local x, y = GetNewPosition(self, npc)
+    self[npc]:SetPosition(x, y + 140)
+    self[npc .. "_img"]:SetPosition(x, y + 95)
+end
+
 function BossCalendar:SetMode(mode)
     self.mode = mode
     self.GetGuiString = self["Get_"..self.mode]
-
-    if self.mode == "deaths" then
-        self.Klaus:SetPosition(-135, -10)
-        self.Klaus_img:SetPosition(-135, -55)
-        self.Klaus:Show()
-        self.Klaus_img:Show()
-        self.compass:SetTint(0, 0, 0, 1)
-        self.skull:SetTint(1, 1, 1, 1)
-    else
-        self.compass:SetTint(1, 1, 1, 1)
-        self.skull:SetTint(0, 0, 0, 1)
-        self.Klaus:SetPosition(225, -10)
-        self.Klaus_img:SetPosition(225, -55)
-        if WORLD_SPECIAL_EVENT ~= SPECIAL_EVENTS["WINTERS_FEAST"] then
-            self.Klaus_img:Hide()
-            self.Klaus:Hide()
-        end
-    end
-
     for i = 7, 9 do
         if self.mode == "deaths" then
             self[NpcImages[i]]:Hide()
@@ -592,15 +597,37 @@ function BossCalendar:SetMode(mode)
         end
     end
 
+    if self.mode == "deaths" then
+        self.Klaus:Show()
+        self.Klaus_img:Show()
+
+        UpdatePosition(self, "Klaus")
+        UpdatePosition(self, "Crab King")
+
+        self.compass:SetTint(0, 0, 0, 1)
+        self.skull:SetTint(1, 1, 1, 1)
+    else
+        if WORLD_SPECIAL_EVENT ~= SPECIAL_EVENTS["WINTERS_FEAST"] then
+            self.Klaus:Hide()
+            self.Klaus_img:Hide()
+        end
+
+        UpdatePosition(self, "Klaus")
+        UpdatePosition(self, "Crab King")
+
+        self.compass:SetTint(1, 1, 1, 1)
+        self.skull:SetTint(0, 0, 0, 1)
+    end
+
     self:Update()
 end
 
 function BossCalendar:Close()
     if self.open then
 
-        if self.updateTask then 
+        if self.updateTask then
             self.updateTask:Cancel()
-            self.updateTask = nil 
+            self.updateTask = nil
         end
 
         TheFrontEnd:PopScreen(self)
@@ -609,8 +636,8 @@ function BossCalendar:Close()
 end
 
 function BossCalendar:Open()
-    if self.open or not self.init then 
-        return 
+    if self.open or not self.init then
+        return
     end
 
     Screen._ctor(self, "Boss Calendar")
@@ -661,7 +688,7 @@ function BossCalendar:Open()
     end
 
     for i = 1, #Npcs do
-        local x, y = (i - 1) % 5 * 120 - 255, math.floor(i / 6) * -150
+        local x, y = (i - 1) % 5 * 120 - 255, math.floor((i- 1) / 5) * -130
         local npc, img = Npcs[i], NpcImages[i]
         self[npc] = self.root:AddChild(Text(UIFONT, 25))
         self[npc]:SetPosition(x, y + 140)
@@ -678,7 +705,7 @@ function BossCalendar:Open()
 
     self:SetMode(self.mode)
     self.updateTask = ThePlayer:DoPeriodicTask(1, self.Update)
-    
+
     return true
 end
 

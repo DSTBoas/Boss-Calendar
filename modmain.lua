@@ -1,4 +1,5 @@
 local GLOBAL = GLOBAL
+local InGamePlay = GLOBAL.InGamePlay
 local BossCalendar = GLOBAL.require("screens/bosscalendar")
 
 Assets =
@@ -30,7 +31,8 @@ do
         "klaussackkey",
         "blowdart_pipe",
         "malbatross_beak",
-        "skeletonhat"
+        "skeletonhat",
+        "singingshell_octave5"
     }
     for i = 1, #prefabs do
         AddPrefabPostInit(prefabs[i], function(inst)
@@ -42,10 +44,19 @@ end
 if GetModConfigData("OPEN_KEY") then
     local OPEN_KEY, TOGGLE_MODE, TheInput = GetModConfigData("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
 
+    local function GetActiveScreen()
+    return TheFrontEnd
+       and TheFrontEnd.GetActiveScreen
+       and type(TheFrontEnd.GetActiveScreen) == "function"
+       and type(TheFrontEnd:GetActiveScreen()) == "table"
+       and TheFrontEnd:GetActiveScreen()
+    end
+
     local function canToggle()
-        return TheFrontEnd
-           and TheFrontEnd.GetActiveScreen
-           and TheFrontEnd:GetActiveScreen().name
+        local activeScreen = GetActiveScreen()
+        return InGamePlay()
+           and activeScreen
+           and activeScreen.name
            and (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
     end
 
