@@ -1,5 +1,7 @@
 local GLOBAL = GLOBAL
 local InGamePlay = GLOBAL.InGamePlay
+local rawget = GLOBAL.rawget
+
 local BossCalendar = GLOBAL.require("screens/bosscalendar")
 
 Assets =
@@ -41,8 +43,14 @@ do
     end
 end
 
-if GetModConfigData("OPEN_KEY") then
-    local OPEN_KEY, TOGGLE_MODE, TheInput = GetModConfigData("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
+local function GetConfigByte(config)
+    config = GetModConfigData(config)
+    return type(config) == "number" and config
+        or rawget(GLOBAL, config)
+end
+
+if GetConfigByte("OPEN_KEY") then
+    local OPEN_KEY, TOGGLE_MODE, TheInput = GetConfigByte("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
 
     local function GetActiveScreen()
     return TheFrontEnd
