@@ -22,22 +22,22 @@ if not folder_name:find("workshop-") then
     name = name .. " (dev)"
 end
 
+local function AddConfigOption(desc, data, hover)
+    return {description = desc, data = data, hover = hover}
+end
+
 local function AddConfig(label, name, options, default, hover)
     return {
                 label = label,
                 name = name,
                 options = options,
                 default = default,
-                hover = hover or ""
+                hover = hover -- or ""
            }
 end
 
 local function AddSectionTitle(title)
     return AddConfig(title, "", {{description = "", data = 0}}, 0)
-end
-
-local function CreateOption(desc, data, hover)
-    return {description = desc, data = data, hover = hover}
 end
 
 local function GetKeyboardOptions()
@@ -81,57 +81,37 @@ local function GetKeyboardOptions()
         "PAGEDOWN"
     }
 
-    local function AddConfigOption(t, key)
-        t[#t + 1] = {description = key, data = "KEY_" .. key}
+    local function AddConfigKey(t, key)
+        t[#t + 1] = AddConfigOption(key, "KEY_" .. key)
     end
 
     local function AddDisabledConfigOption(t)
-        t[#t + 1] = {description = "Disabled", data = false}
+        t[#t + 1] = AddConfigOption("Disabled", false)
     end
 
     AddDisabledConfigOption(keys)
 
     local string = ""
     for i = 1, 26 do
-        AddConfigOption(keys, string.format("%c", 64 + i))
+        AddConfigKey(keys, string.format("%c", 64 + i))
     end
 
-    for i = 1, 9 do
-        AddConfigOption(keys, i .. "")
+    for i = 1, 10 do
+        AddConfigKey(keys, i % 10 .. "")
     end
-    AddConfigOption(keys, "0")
 
     for i = 1, 12 do
-        AddConfigOption(keys, "F" .. i)
+        AddConfigKey(keys, "F" .. i)
     end
 
     for i = 1, #specialKeys do
-        AddConfigOption(keys, specialKeys[i])
+        AddConfigKey(keys, specialKeys[i])
     end
     
     AddDisabledConfigOption(keys)
 
     return keys
 end
-
-local COLORNAMES =
-{
-    "White",
-    "Red",
-    "Coral",
-    "Orange",
-    "Yellow",
-    "Khaki",
-    "Chocolate",
-    "Brown",
-    "Green",
-    "Light Green",
-    "Cyan",
-    "Blue",
-    "Light Blue",
-    "Purple",
-    "Pink"
-}
 
 local KeyboardOptions = GetKeyboardOptions()
 
@@ -167,10 +147,27 @@ local OpeningModeOptions =
     CreateOption("Hold", false, "The Calendar is only shown while you are holding the keybind"),
 }
 
-local ColorOptions = {}
+local ColorOptions =
+{
+    "White",
+    "Red",
+    "Coral",
+    "Orange",
+    "Yellow",
+    "Khaki",
+    "Chocolate",
+    "Brown",
+    "Green",
+    "Light Green",
+    "Cyan",
+    "Blue",
+    "Light Blue",
+    "Purple",
+    "Pink"
+}
 
-for i = 1, #COLORNAMES do
-    ColorOptions[i] = CreateOption(COLORNAMES[i], COLORNAMES[i])
+for i = 1, #ColorOptions do
+    ColorOptions[i] = CreateOption(ColorOptions[i], ColorOptions[i])
 end
 
 local SettingsMessage = "Set to your liking"
