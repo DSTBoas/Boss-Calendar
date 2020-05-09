@@ -188,7 +188,7 @@ configuration_options =
     ),
 
 
-    AddSectionTitle("Gui"),
+    AddSectionTitle("Calendar"),
     AddConfig(
         "Open method",
         "TOGGLE_MODE",
@@ -197,14 +197,14 @@ configuration_options =
         SettingsMessage
     ),
     AddConfig(
-        "Gui time units", "CALENDAR_UNITS",
+        "Time units", "CALENDAR_UNITS",
         TimeUnitOptions,
         true,
         SettingsMessage
     ),
 
 
-    AddSectionTitle("Chat"),
+    AddSectionTitle("Announce"),
     AddConfig(
         "Announce style",
         "ANNOUNCE_STYLES",
@@ -213,7 +213,7 @@ configuration_options =
         SettingsMessage
     ),
     AddConfig(
-        "Announce time units",
+        "Time units",
         "ANNOUNCE_UNITS",
         TimeUnitOptions,
         true,
