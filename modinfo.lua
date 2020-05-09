@@ -17,7 +17,7 @@ client_only_mod = true
 
 api_version = 10
 
-folder_name = folder_name or "Equipment-Control"
+folder_name = folder_name or "Boss-Calendar"
 if not folder_name:find("workshop-") then
     name = name .. " (dev)"
 end
