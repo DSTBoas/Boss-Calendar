@@ -24,29 +24,24 @@ local function WalrusCampPostInit(inst)
 end
 AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
-do
-    local prefabs =
-    {
-        "yellowgem",
-        "hivehat",
-        "shroom_skin",
-        "klaussackkey",
-        "blowdart_pipe",
-        "malbatross_beak",
-        "skeletonhat",
-        "singingshell_octave5"
-    }
-    for i = 1, #prefabs do
-        AddPrefabPostInit(prefabs[i], function(inst)
-            inst:DoTaskInTime(0, function() BossCalendar:ValidateDeath(inst) end)
-        end)
-    end
+for _, prefab in pairs
+{
+    "yellowgem",
+    "hivehat",
+    "shroom_skin",
+    "klaussackkey",
+    "blowdart_pipe",
+    "malbatross_beak",
+    "skeletonhat",
+    "singingshell_octave5"
+} do
+    AddPrefabPostInit(prefab, function(inst)
+        inst:DoTaskInTime(0, function() BossCalendar:ValidateDeath(inst) end)
+    end)
 end
 
 local function GetConfigByte(config)
-    config = GetModConfigData(config)
-    return type(config) == "number" and config
-        or rawget(GLOBAL, config)
+    return rawget(GLOBAL, GetModConfigData(config)) or 0
 end
 
 if GetConfigByte("OPEN_KEY") then
@@ -93,7 +88,9 @@ if GetConfigByte("OPEN_KEY") then
 end
 
 local function Init(inst)
-    inst:DoTaskInTime(0, function() BossCalendar:Init(inst) end)
+    inst:DoTaskInTime(0, function() 
+        BossCalendar:Init(inst) 
+    end)
 end
 AddPlayerPostInit(Init)
 

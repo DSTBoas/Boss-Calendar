@@ -163,7 +163,7 @@ function BossCalendar:AddMapIcons(widget)
     widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
 
     for i = 1, #WalrusCamps do
-        widget.camp_icons:AddMapIcon(string.format("images/%s.xml", Settings.IGLOO_ICON), string.format("%s%s.tex", Settings.IGLOO_ICON, i), WalrusCamps[i])
+        widget.camp_icons:AddMapIcon(string.format("images/%s.xml", "igloo"), string.format("%s%s.tex", "igloo", i), WalrusCamps[i])
     end
 end
 
@@ -215,7 +215,7 @@ function BossCalendar:AddCamp(inst)
         end
 
         if Settings.IGLOO_ICON then
-            inst.MiniMapEntity:SetIcon(string.format("%s%s.tex", Settings.IGLOO_ICON, iglooNumber))
+            inst.MiniMapEntity:SetIcon(string.format("%s%s.tex", "igloo", iglooNumber))
         end
     end
 end
@@ -250,9 +250,6 @@ function BossCalendar:SetSettings(settings)
     }
 
     Settings = settings
-
-    -- Legacy support
-    Settings.IGLOO_ICON = "igloo"
 
     Settings.REMINDER_COLOR = ColorToRGB[Settings.REMINDER_COLOR]
     Settings.ANNOUNCE_STYLES = Settings.ANNOUNCE_UNITS and self["Announce"..tostring(Settings.ANNOUNCE_STYLES):gsub("%.", "_")]
