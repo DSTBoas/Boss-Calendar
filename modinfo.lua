@@ -117,34 +117,34 @@ local KeyboardOptions = GetKeyboardOptions()
 
 local SettingOptions =
 {
-    CreateOption("Enabled", true),
-    CreateOption("Disabled", false),
+    AddConfigOption("Enabled", true),
+    AddConfigOption("Disabled", false),
 }
 
 local AnnounceStyleOptions =
 {
-    CreateOption("Style 1", 1, "Style 1: Dragonfly respawns on day 21."),
-    CreateOption("Style 2", 2, "Style 2: Dragonfly respawns in 20 days."),
-    CreateOption("Style 2.5", 2.5, "Style 2.5: Dragonfly respawns in 19.9 days."),
+    AddConfigOption("Style 1", 1, "Style 1: Dragonfly respawns on day 21."),
+    AddConfigOption("Style 2", 2, "Style 2: Dragonfly respawns in 20 days."),
+    AddConfigOption("Style 2.5", 2.5, "Style 2.5: Dragonfly respawns in 19.9 days."),
 }
 
 local SayDurationOptions =
 {
-    CreateOption("Short", "Reminders last for 3 seconds"),
-    CreateOption("Default", "Reminders last for 5 seconds"),
-    CreateOption("Long", "Reminders last for 7 seconds"),
+    AddConfigOption("Short", "Reminders last for 3 seconds"),
+    AddConfigOption("Default", "Reminders last for 5 seconds"),
+    AddConfigOption("Long", "Reminders last for 7 seconds"),
 }
 
 local TimeUnitOptions =
 {
-    CreateOption("Days", true),
-    CreateOption("Time", false),
+    AddConfigOption("Days", true),
+    AddConfigOption("Time", false),
 }
 
 local OpeningModeOptions =
 {
-    CreateOption("Toggle", true, "Press the keybind to toggle between opening/closing the Calendar"),
-    CreateOption("Hold", false, "The Calendar is only shown while you are holding the keybind"),
+    AddConfigOption("Toggle", true, "Press the keybind to toggle between opening/closing the Calendar"),
+    AddConfigOption("Hold", false, "The Calendar is only shown while you are holding the keybind"),
 }
 
 local ColorOptions =
@@ -167,7 +167,7 @@ local ColorOptions =
 }
 
 for i = 1, #ColorOptions do
-    ColorOptions[i] = CreateOption(ColorOptions[i], ColorOptions[i])
+    ColorOptions[i] = AddConfigOption(ColorOptions[i], ColorOptions[i])
 end
 
 local SettingsMessage = "Set to your liking"
