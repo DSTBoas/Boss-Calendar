@@ -32,7 +32,7 @@ local function AddConfig(label, name, options, default, hover)
                 name = name,
                 options = options,
                 default = default,
-                hover = hover -- or ""
+                hover = hover
            }
 end
 
