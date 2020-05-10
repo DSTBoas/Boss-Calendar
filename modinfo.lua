@@ -93,7 +93,7 @@ local function GetKeyboardOptions()
 
     local string = ""
     for i = 1, 26 do
-        AddConfigKey(keys, string.format("%c", 64 + i))
+        AddConfigKey(keys, string.char(64 + i))
     end
 
     for i = 1, 10 do
