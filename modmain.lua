@@ -20,7 +20,9 @@ if GetModConfigData("IGLOO_ICON") then
 end
 
 local function WalrusCampPostInit(inst)
-    inst:DoTaskInTime(0, BossCalendar.AddCamp, inst)
+    inst:DoTaskInTime(0, function()
+        BossCalendar:AddCamp(inst)
+    end)
 end
 AddPrefabPostInit("walrus_camp", WalrusCampPostInit)
 
@@ -36,7 +38,9 @@ for _, prefab in pairs
     "singingshell_octave5"
 } do
     AddPrefabPostInit(prefab, function(inst)
-        inst:DoTaskInTime(0, function() BossCalendar:ValidateDeath(inst) end)
+        inst:DoTaskInTime(0, function() 
+            BossCalendar:ValidateDeath(inst) 
+        end)
     end)
 end
 
@@ -94,7 +98,9 @@ local function Init(inst)
 end
 AddPlayerPostInit(Init)
 
-AddSimPostInit(BossCalendar.LoadIgloos)
+AddSimPostInit(function()
+    BossCalendar:LoadIgloos()
+end)
 
 BossCalendar:SetSettings(
     {

@@ -5,7 +5,7 @@ icon_atlas = "modicon.xml"
 icon = "modicon.tex"
 
 author = "Boas"
-version = "3.2"
+version = "3.3"
 forumthread = ""
 
 dont_starve_compatible = false
@@ -185,7 +185,7 @@ configuration_options =
     ),
 
 
-    AddSectionTitle("Calendar"),
+    AddSectionTitle("General"),
     AddConfig(
         "Open method",
         "TOGGLE_MODE",
@@ -194,31 +194,11 @@ configuration_options =
         SettingsMessage
     ),
     AddConfig(
-        "Time units", "CALENDAR_UNITS",
+        "Calendar time units", "CALENDAR_UNITS",
         TimeUnitOptions,
         true,
         SettingsMessage
     ),
-
-
-    AddSectionTitle("Announce"),
-    AddConfig(
-        "Announce style",
-        "ANNOUNCE_STYLES",
-        AnnounceStyleOptions,
-        1,
-        SettingsMessage
-    ),
-    AddConfig(
-        "Time units",
-        "ANNOUNCE_UNITS",
-        TimeUnitOptions,
-        true,
-        SettingsMessage
-    ),
-
-
-    AddSectionTitle("MacTusk"),
     AddConfig(
         "Igloo numbers",
         "IGLOO_NUMBERS",
@@ -231,6 +211,23 @@ configuration_options =
         "IGLOO_ICON",
         SettingOptions,
         "igloo",
+        SettingsMessage
+    ),
+
+
+    AddSectionTitle("Announcing"),
+    AddConfig(
+        "Announce style",
+        "ANNOUNCE_STYLES",
+        AnnounceStyleOptions,
+        1,
+        SettingsMessage
+    ),
+    AddConfig(
+        "Announce time units",
+        "ANNOUNCE_UNITS",
+        TimeUnitOptions,
+        true,
         SettingsMessage
     ),
 

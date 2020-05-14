@@ -2,8 +2,8 @@ local Screen = require "widgets/screen"
 local Widget = require "widgets/widget"
 local Text = require "widgets/text"
 local Image = require "widgets/image"
-local PersistentData = require("persistentdata")
-local PersistentMapIcons = require("widgets/persistentmapicons")
+local PersistentData = require("bosscalendar_persistentdata")
+local PersistentMapIcons = require("widgets/bosscalendar_persistentmapicons")
 local Announcer = require("bosscalendar_announcer")()
 
 local BossCalendar = Class(Screen)
@@ -685,7 +685,7 @@ function BossCalendar:Open()
     end
 
     for i = 1, #Npcs do
-        local x, y = (i - 1) % 5 * 120 - 255, math.floor((i- 1) / 5) * -130
+        local x, y = (i - 1) % 5 * 120 - 255, math.floor((i - 1) / 5) * -130
         local npc, img = Npcs[i], NpcImages[i]
         self[npc] = self.root:AddChild(Text(UIFONT, 25))
         self[npc]:SetPosition(x, y + 140)
