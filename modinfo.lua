@@ -143,7 +143,7 @@ local TimeUnitOptions =
 
 local OpeningModeOptions =
 {
-    AddConfigOption("Toggle", true, "Press to open or close the Calendar"),
+    AddConfigOption("Toggle", true, "Press to open/close the Calendar"),
     AddConfigOption("Hold", false, "Hold to open the Calendar"),
 }
 
