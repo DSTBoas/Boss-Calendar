@@ -5,7 +5,7 @@ icon_atlas = "modicon.xml"
 icon = "modicon.tex"
 
 author = "Boas"
-version = "3.3"
+version = "3.4"
 forumthread = ""
 
 dont_starve_compatible = false
@@ -143,8 +143,8 @@ local TimeUnitOptions =
 
 local OpeningModeOptions =
 {
-    AddConfigOption("Toggle", true, "Press the keybind to toggle between opening/closing the Calendar"),
-    AddConfigOption("Hold", false, "The Calendar is only shown while you are holding the keybind"),
+    AddConfigOption("Toggle", true, "Press to open or close the Calendar"),
+    AddConfigOption("Hold", false, "Hold to open the Calendar"),
 }
 
 local ColorOptions =
