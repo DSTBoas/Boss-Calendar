@@ -71,7 +71,9 @@ local Npcs =
     -- Winterfeast
     "Klaus"
 }
-local Session, Sayfn
+local Talker = require "components/talker"
+local Sayfn = Talker.Say
+local Session
 
 ---
 --- Helper
@@ -152,7 +154,7 @@ local function OnTimerDone(inst, data)
         return 
     end 
 
-    BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.REMINDER_DURATION)
+    BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.REMINDER_DURATION or 5)
 end
 
 ---
@@ -312,7 +314,6 @@ end
 
 function BossCalendar:Init(inst)
     if inst == ThePlayer then
-        Sayfn = ThePlayer.components.talker.Say
         ThePlayer:AddComponent("timer")
         ThePlayer:ListenForEvent("timerdone", OnTimerDone)
 

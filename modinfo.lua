@@ -1,5 +1,5 @@
 name = "Boss Calendar"
-description = "Reminds you when bosses respawn"
+description = "Reminds you when bosses respawn\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tMade with 󰀍"
 
 icon_atlas = "modicon.xml"
 icon = "modicon.tex"
@@ -130,9 +130,9 @@ local AnnounceStyleOptions =
 
 local SayDurationOptions =
 {
-    AddConfigOption("Short", "Reminders last for 3 seconds"),
-    AddConfigOption("Default", "Reminders last for 5 seconds"),
-    AddConfigOption("Long", "Reminders last for 7 seconds"),
+    AddConfigOption("Short", 3, "Reminders last for 3 seconds"),
+    AddConfigOption("Default", 5, "Reminders last for 5 seconds"),
+    AddConfigOption("Long", 7, "Reminders last for 7 seconds"),
 }
 
 local TimeUnitOptions =
