@@ -210,7 +210,7 @@ configuration_options =
         "Map icons",
         "IGLOO_ICON",
         SettingOptions,
-        "igloo",
+        true,
         SettingsMessage
     ),
 
