@@ -1,5 +1,4 @@
 local GLOBAL = GLOBAL
-local InGamePlay = GLOBAL.InGamePlay
 local rawget = GLOBAL.rawget
 
 local BossCalendar = GLOBAL.require("screens/bosscalendar")
@@ -49,22 +48,18 @@ local function GetConfigByte(config)
 end
 
 if GetConfigByte("OPEN_KEY") then
-    local OPEN_KEY, TOGGLE_MODE, TheInput = GetConfigByte("OPEN_KEY"), GetModConfigData("TOGGLE_MODE"), GLOBAL.TheInput
+    local OPEN_KEY = GetConfigByte("OPEN_KEY")
+    local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
+    local TheInput = GLOBAL.TheInput
 
-    local function GetActiveScreen()
-    return TheFrontEnd
-       and TheFrontEnd.GetActiveScreen
-       and type(TheFrontEnd.GetActiveScreen) == "function"
-       and type(TheFrontEnd:GetActiveScreen()) == "table"
-       and TheFrontEnd:GetActiveScreen()
+    local function getActiveScreenName()
+        local activeScreen = TheFrontEnd:GetActiveScreen()
+        return activeScreen and activeScreen.name or ""
     end
 
     local function canToggle()
-        local activeScreen = GetActiveScreen()
-        return InGamePlay()
-           and activeScreen
-           and activeScreen.name
-           and (TheFrontEnd:GetActiveScreen().name == "HUD" or TheFrontEnd:GetActiveScreen().name == "Boss Calendar")
+        local activeScreenName = getActiveScreenName()
+        return activeScreenName == "HUD" or activeScreenName == "Boss Calendar"
     end
 
     local function displayCalendar()
