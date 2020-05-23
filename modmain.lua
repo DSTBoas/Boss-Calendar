@@ -1,6 +1,9 @@
 local GLOBAL = GLOBAL
+
+-- GLOBAL
 local rawget = GLOBAL.rawget
 
+-- Require
 local BossCalendar = GLOBAL.require("screens/bosscalendar")
 
 Assets =
@@ -57,13 +60,13 @@ if GetConfigByte("OPEN_KEY") then
         return activeScreen and activeScreen.name or ""
     end
 
-    local function canToggle()
+    local function validateToggle()
         local activeScreenName = getActiveScreenName()
         return activeScreenName == "HUD" or activeScreenName == "Boss Calendar"
     end
 
     local function displayCalendar()
-        if canToggle() then
+        if validateToggle() then
             if BossCalendar:Open() then
                 TheFrontEnd:PushScreen(BossCalendar)
             elseif TOGGLE_MODE then
@@ -73,7 +76,7 @@ if GetConfigByte("OPEN_KEY") then
     end
 
     local function closeCalendar()
-        if canToggle() then
+        if validateToggle() then
             BossCalendar:Close()
         end
     end

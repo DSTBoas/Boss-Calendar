@@ -85,12 +85,12 @@ end
 
 local function SecondsToDays(seconds)
     local formattedString = string.format("%.1f", (seconds - GetServerTime()) / TUNING.TOTAL_DAY_TIME)
-    local formattedStringToNum = tonumber(formattedString)
+    local formattedStringToNumber = tonumber(formattedString)
 
     if formattedString == "0.0" then
         formattedString = "0.1"
-    elseif formattedStringToNum % 1 == 0 then
-        formattedString = tostring(formattedStringToNum)
+    elseif formattedStringToNumber % 1 == 0 then
+        formattedString = tostring(formattedStringToNumber)
     end
 
     return formattedString
@@ -105,18 +105,18 @@ local function SecondsToTime(seconds, announce)
 
     if hours > 0 then
         local hours_str = not announce and "h" or hours == 1 and " hour" or " hours"
-        str = hours..hours_str
+        str = hours .. hours_str
     end
 
     if minutes > 0 then
         str = str == "" and str or str.." "
         local minutes_str = not announce and "m" or minutes == 1 and " minute" or " minutes"
-        str = str..minutes..minutes_str
+        str = str .. minutes .. minutes_str
     end
 
     if hours < 1 and minutes < 1 then
         local seconds_str = not announce and "s" or seconds == 1 and " second" or " seconds"
-        return math.ceil(seconds)..seconds_str
+        return math.ceil(seconds) .. seconds_str
     end
 
     return str
@@ -193,7 +193,7 @@ local function GetCampNumber(pos)
             return i
         end
     end
-    return
+    return false
 end
 
 local function InsertCamp(pos)
@@ -533,6 +533,7 @@ end
 
 function BossCalendar:Get_timer(npc, img)
     local str = ""
+
     if self.trackers[npc][self.mode] then
         self[img]:SetTint(0,0,0,1)
         self[npc]:SetColour(1,0,0,1)
@@ -543,6 +544,7 @@ function BossCalendar:Get_timer(npc, img)
         self[npc]:SetColour(1,1,1,1)
         str = npc
     end
+
     return str
 end
 
@@ -565,6 +567,7 @@ end
 
 local function GetNewPosition(self, npc)
     local count = 0
+
     for i = 1, #Npcs do
         if self[Npcs[i]]:IsVisible() then
             count = count + 1
@@ -573,6 +576,7 @@ local function GetNewPosition(self, npc)
             break
         end
     end
+
     return (count - 1) % 5 * 120 - 255, math.floor((count- 1) / 5) * -130
 end
 
@@ -694,8 +698,12 @@ function BossCalendar:Open()
         self[img] = self.root:AddChild(Image("images/npcs.xml", npc:trim()..".tex"))
         self[img]:SetSize(68, 68)
         self[img]:SetPosition(x, y + 95)
-        self[img].OnMouseButton = function(_, button, down) 
-            if button == 1000 and down and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT) and Announcer:CanAnnounce(npc:trim()) then
+        self[img].OnMouseButton = function(_, button, down)
+            if button == 1000
+            and down
+            and TheInput:IsControlPressed(CONTROL_FORCE_INSPECT)
+            and Announcer:ValidateAnnounce(npc:trim())
+            then
                 self:OnAnnounce(npc)
             end
         end
