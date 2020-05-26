@@ -9,12 +9,12 @@ end
 
 function Announcer:Announce(message, npc)
 	if not self.cooldown and not self.cooldowns[npc] then
-		self.cooldown = ThePlayer:DoTaskInTime(3, function() 
-            self.cooldown = false 
+		self.cooldown = ThePlayer:DoTaskInTime(3, function()
+            self.cooldown = false
         end)
 
-		self.cooldowns[npc] = ThePlayer:DoTaskInTime(10, function() 
-            self.cooldowns[npc] = nil 
+		self.cooldowns[npc] = ThePlayer:DoTaskInTime(10, function()
+            self.cooldowns[npc] = nil
         end)
 
 		TheNet:Say(STRINGS.LMB .. " " .. message, TheInput:IsKeyDown(KEY_CTRL))
