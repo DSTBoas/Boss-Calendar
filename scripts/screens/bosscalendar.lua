@@ -8,7 +8,7 @@ local Announcer = require("bosscalendar_announcer")()
 
 local BossCalendar = Class(Screen)
 local DataContainer = PersistentData("BossCalendar")
-local WalrusCamps, Settings, NpcImages = {}, {}, {}
+local WalrusCamps, Marbles, Settings, NpcImages = {}, {}, {}, {}
 local RespawnDurations =
 {
     toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
@@ -131,8 +131,8 @@ end
 ---
 
 function BossCalendar:Say(message, time)
-    if self.talking then 
-        return 
+    if self.talking then
+        return
     end
     self.talking = true
     ThePlayer.components.talker.lineduration = time
@@ -150,9 +150,9 @@ local function OnTimerDone(inst, data)
     BossCalendar.trackers[npc].timer = nil
     BossCalendar:Save()
 
-    if npc:trim() == "MacTusk" and not TheWorld.state.iswinter then 
-        return 
-    end 
+    if npc:trim() == "MacTusk" and not TheWorld.state.iswinter then
+        return
+    end
 
     BossCalendar:Say(string.format("%s has just respawned.", npc), Settings.REMINDER_DURATION or 5)
 end
@@ -166,6 +166,10 @@ function BossCalendar:AddMapIcons(widget)
 
     for i = 1, #WalrusCamps do
         widget.camp_icons:AddMapIcon(string.format("images/%s.xml", "igloo"), string.format("%s%s.tex", "igloo", i), WalrusCamps[i])
+    end
+
+    for i = 1, #Marbles do
+        widget.camp_icons:AddMapIcon("images/marble.xml", Marbles[i].tex, Marbles[i].pos)
     end
 end
 
@@ -223,6 +227,77 @@ function BossCalendar:AddCamp(inst)
 end
 
 ---
+--- Map icons / marbles
+---
+
+local function SaveMarbles()
+    local marbles = {}
+
+    for i = 1, #Marbles do
+        marbles[i] =
+        {
+            tex = Marbles[i].tex,
+            pos = Vector3(Marbles[i].pos.x, Marbles[i].pos.y, Marbles[i].pos.z),
+        }
+    end
+
+    DataContainer:SetValue("marbles_"..tostring(TheWorld.meta.seed), marbles)
+    DataContainer:Save()
+end
+
+local function TableContains(pos)
+    for i = 1, #Marbles do
+        if Marbles[i].pos:__eq(pos) then
+            return i
+        end
+    end
+    return false
+end
+
+local function GetDist(player, pos)
+    return pos:Dist(player:GetPosition())
+end
+
+local function GetMarble(pos)
+    local x, y, z = pos:Get()
+    local ents = TheSim:FindEntities(x, y, z, 1)
+    return ents[1] and ents[1].prefab and ents[1].prefab:sub(1,10) == "sculpture_"
+end
+
+local MarbleTasks = {}
+
+local function MarblePeriodicTask(inst, pos)
+    local dist = GetDist(inst, pos)
+    if dist < 64 then
+        local marble = GetMarble(pos)
+        if not marble then
+            MarbleTasks[pos]:Cancel()
+            local ceilVector = pos
+            local index = TableContains(ceilVector)
+            table.remove(Marbles, index)
+            SaveMarbles()
+        end
+    end
+end
+
+function BossCalendar:SculpturePostInit(inst)
+    if inst and inst:IsValid() then
+        local pos = inst:GetPosition()
+
+        if not TableContains(pos) then
+            Marbles[#Marbles + 1] =
+            {
+                pos = pos,
+                tex = inst.prefab .. ".tex",
+            }
+            SaveMarbles()
+            local pos = inst:GetPosition()
+            MarbleTasks[pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, pos)
+        end
+    end
+end
+
+---
 --- Initialisation
 ---
 
@@ -264,6 +339,26 @@ function BossCalendar:LoadIgloos()
     if camps then
         for i = 1, #camps do
             WalrusCamps[i] = Vector3(camps[i].x, camps[i].y, camps[i].z)
+        end
+    end
+end
+
+local function StartMarbleTasks()
+    for i = 1, #Marbles do
+        MarbleTasks[Marbles[i].pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[i].pos)
+    end
+end
+
+function BossCalendar:LoadMarbles()
+    DataContainer:Load()
+    local marbles = DataContainer:GetValue(tostring("marbles_"..TheWorld.meta.seed))
+    if marbles then
+        for i = 1, #marbles do
+            Marbles[i] =
+            {
+                tex = marbles[i].tex,
+                pos = Vector3(marbles[i].pos.x, marbles[i].pos.y, marbles[i].pos.z)
+            }
         end
     end
 end
@@ -314,6 +409,7 @@ end
 
 function BossCalendar:Init(inst)
     if inst == ThePlayer then
+        StartMarbleTasks()
         ThePlayer:AddComponent("timer")
         ThePlayer:ListenForEvent("timerdone", OnTimerDone)
 
@@ -405,8 +501,8 @@ function BossCalendar:AddKill(npc)
 end
 
 function BossCalendar:KilledMonster(npc, inst)
-    if not self.init then 
-        return 
+    if not self.init then
+        return
     end
 
     if npc == "MacTusk" then
@@ -446,14 +542,14 @@ local function IsNearby(npc)
     end
 
     local x, y, z = ThePlayer.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x, y, z, 30, 0, 
+    local ents = TheSim:FindEntities(x, y, z, 30, 0,
         {"lava", "tree", "FX", "NOCLICK", "DECOR", "INLIMBO", "burnt", "boulder", "structure"},
         {"stargate", "epic", "blocker", "antlion_sinkhole_blocker"}
     )
 
     for i = 1, #ents do
         if ents[i].name == npc then
-            if ents[i].prefab == "toadstool_cap" then 
+            if ents[i].prefab == "toadstool_cap" then
                 return ents[i].AnimState:IsCurrentAnimation("mushroom_toad_idle_loop")
             end
             return true
@@ -480,7 +576,7 @@ function BossCalendar:OnAnnounce(npc)
 end
 
 function BossCalendar:AnnounceToKill(npc)
-    return IsNearby(npc:trim()) and string.format("I am at %s.", npc) 
+    return IsNearby(npc:trim()) and string.format("I am at %s.", npc)
         or string.format("Let's kill %s.", npc)
 end
 
@@ -537,7 +633,7 @@ function BossCalendar:Get_timer(npc, img)
     if self.trackers[npc][self.mode] then
         self[img]:SetTint(0,0,0,1)
         self[npc]:SetColour(1,0,0,1)
-        str = Settings.CALENDAR_UNITS and SecondsToDays(self.trackers[npc][self.mode]).."d" 
+        str = Settings.CALENDAR_UNITS and SecondsToDays(self.trackers[npc][self.mode]).."d"
               or SecondsToTime(self.trackers[npc][self.mode])
     else
         self[img]:SetTint(1,1,1,1)

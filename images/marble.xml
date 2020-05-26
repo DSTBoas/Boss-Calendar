@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="marble.tex" />
+	<Elements>
+		<Element name="sculpture_bishophead.tex" u1="0.001" u2="0.45603125" v2="0.999" v1="0.4931875" variant="" />
+		<Element name="sculpture_knighthead.tex" u1="0.45803125" u2="0.93259375" v2="0.999" v1="0.4931875" variant="" />
+		<Element name="sculpture_rooknose.tex" u1="0.001" u2="0.4755625" v2="0.4911875" v1="0.0244375" variant="" />
+	</Elements>
+</Atlas>

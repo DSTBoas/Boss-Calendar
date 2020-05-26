@@ -5,7 +5,7 @@ icon_atlas = "modicon.xml"
 icon = "modicon.tex"
 
 author = "Boas"
-version = "3.6"
+version = "3.7"
 forumthread = ""
 
 dont_starve_compatible = false
@@ -121,6 +121,12 @@ local SettingOptions =
     AddConfigOption("Enabled", true),
 }
 
+local BetaSettingOptions =
+{
+    AddConfigOption("Disabled", false),
+    AddConfigOption("Enabled", true, "Use at your own discretion"),
+}
+
 local AnnounceStyleOptions =
 {
     AddConfigOption("Style 1", 1, "Style 1: Dragonfly respawns on day 21."),
@@ -170,7 +176,8 @@ for i = 1, #ColorOptions do
     ColorOptions[i] = AddConfigOption(ColorOptions[i], ColorOptions[i])
 end
 
-local SettingsMessage = "Set to your liking"
+local SettingMessage  = "Set to your liking"
+local BetaSettingMessage = "(beta) " .. SettingMessage
 local AssignKeyMessage = "Assign a key"
 
 configuration_options =
@@ -191,27 +198,37 @@ configuration_options =
         "TOGGLE_MODE",
         OpeningModeOptions,
         true,
-        SettingsMessage
+        SettingMessage 
     ),
     AddConfig(
         "Calendar time units", "CALENDAR_UNITS",
         TimeUnitOptions,
         true,
-        SettingsMessage
+        SettingMessage 
     ),
     AddConfig(
         "Igloo numbers",
         "IGLOO_NUMBERS",
         SettingOptions,
         true,
-        SettingsMessage
+        SettingMessage 
     ),
+
+
+    AddSectionTitle("Map"),
     AddConfig(
-        "Map icons",
+        "Walrus Camp icon",
         "IGLOO_ICON",
         SettingOptions,
         true,
-        SettingsMessage
+        SettingMessage 
+    ),
+    AddConfig(
+        "(beta) Suspicious Marble icon",
+        "MARBLE_ICON",
+        BetaSettingOptions,
+        false,
+        BetaSettingMessage
     ),
 
 
@@ -221,14 +238,14 @@ configuration_options =
         "ANNOUNCE_STYLES",
         AnnounceStyleOptions,
         1,
-        SettingsMessage
+        SettingMessage 
     ),
     AddConfig(
         "Announce time units",
         "ANNOUNCE_UNITS",
         TimeUnitOptions,
         true,
-        SettingsMessage
+        SettingMessage 
     ),
 
 
@@ -238,13 +255,13 @@ configuration_options =
         "REMINDER_COLOR",
         ColorOptions,
         "Green",
-        SettingsMessage
+        SettingMessage 
     ),
     AddConfig(
         "Reminder duration",
         "REMINDER_DURATION",
         SayDurationOptions,
         5,
-        SettingsMessage
+        SettingMessage 
     ),
 }

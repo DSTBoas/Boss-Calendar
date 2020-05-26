@@ -11,14 +11,16 @@ Assets =
     Asset("ATLAS", "images/skull.xml"),
     Asset("ATLAS", "images/npcs.xml"),
     Asset("ATLAS", "images/igloo.xml"),
+    Asset("ATLAS", "images/marble.xml"),
 }
 AddMinimapAtlas("images/igloo.xml")
+AddMinimapAtlas("images/marble.xml")
 
 if GetModConfigData("IGLOO_ICON") then
     local function MapWidgetPostConstruct(self)
         BossCalendar:AddMapIcons(self)
     end
-    AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct) 
+    AddClassPostConstruct("widgets/mapwidget", MapWidgetPostConstruct)
 end
 
 local function WalrusCampPostInit(inst)
@@ -40,14 +42,29 @@ for _, prefab in pairs
     "singingshell_octave5"
 } do
     AddPrefabPostInit(prefab, function(inst)
-        inst:DoTaskInTime(0, function() 
-            BossCalendar:ValidateDeath(inst) 
+        inst:DoTaskInTime(0, function()
+            BossCalendar:ValidateDeath(inst)
         end)
     end)
 end
 
+if GetModConfigData("MARBLE_ICON") then
+    for _, prefab in pairs
+    {
+        "sculpture_rooknose",
+        "sculpture_knighthead",
+        "sculpture_bishophead",
+    } do
+        AddPrefabPostInit(prefab, function(inst)
+            inst:DoTaskInTime(0, function()
+                BossCalendar:SculpturePostInit(inst)
+            end)
+        end)
+    end
+end
+
 local function GetConfigByte(config)
-    return rawget(GLOBAL, GetModConfigData(config)) or 0
+    return rawget(GLOBAL, GetModConfigData(config))
 end
 
 if GetConfigByte("OPEN_KEY") then
@@ -90,14 +107,17 @@ if GetConfigByte("OPEN_KEY") then
 end
 
 local function Init(inst)
-    inst:DoTaskInTime(0, function() 
-        BossCalendar:Init(inst) 
+    inst:DoTaskInTime(0, function()
+        BossCalendar:Init(inst)
     end)
 end
 AddPlayerPostInit(Init)
 
 AddSimPostInit(function()
     BossCalendar:LoadIgloos()
+    if GetModConfigData("MARBLE_ICON") then
+        BossCalendar:LoadMarbles()
+    end
 end)
 
 BossCalendar:SetSettings(
