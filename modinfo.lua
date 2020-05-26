@@ -217,14 +217,14 @@ configuration_options =
 
     AddSectionTitle("Map"),
     AddConfig(
-        "Walrus Camp icon",
+        "Walrus Camp map icon",
         "IGLOO_ICON",
         SettingOptions,
         true,
         SettingMessage 
     ),
     AddConfig(
-        "(beta) Suspicious Marble icon",
+        "(beta) Suspicious Marble map icon",
         "MARBLE_ICON",
         BetaSettingOptions,
         false,
