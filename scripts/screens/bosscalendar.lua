@@ -162,7 +162,7 @@ end
 ---
 
 function BossCalendar:AddMapIcons(widget)
-    widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, 0.85))
+    widget.camp_icons = widget:AddChild(PersistentMapIcons(widget, .8))
 
     for i = 1, #WalrusCamps do
         widget.camp_icons:AddMapIcon(string.format("images/%s.xml", "igloo"), string.format("%s%s.tex", "igloo", i), WalrusCamps[i])
@@ -245,9 +245,9 @@ local function SaveMarbles()
     DataContainer:Save()
 end
 
-local function TableContains(pos)
+local function TableContains(pos, prefab)
     for i = 1, #Marbles do
-        if Marbles[i].pos:__eq(pos) then
+        if Marbles[i].pos:__eq(pos) and Marbles[i].prefab == prefab then
             return i
         end
     end
@@ -258,41 +258,62 @@ local function GetDist(player, pos)
     return pos:Dist(player:GetPosition())
 end
 
-local function GetMarble(pos)
+local function GetMarble(pos, prefab)
     local x, y, z = pos:Get()
-    local ents = TheSim:FindEntities(x, y, z, 1)
-    return ents[1] and ents[1].prefab and ents[1].prefab:sub(1,10) == "sculpture_"
+    local ents = TheSim:FindEntities(x, y, z, 1, 0, 0, {"irreplaceable", "nonpotatable", "heavy"})
+
+    return ents[1] and ents[1].prefab and ents[1].prefab == prefab
 end
 
 local MarbleTasks = {}
 
-local function MarblePeriodicTask(inst, pos)
-    local dist = GetDist(inst, pos)
+local function FindMarbles(pos)
+    local x, y, z = pos:Get()
+    local ents = TheSim:FindEntities(x, y, z, 100, 0, 0, {"irreplaceable", "nonpotatable", "heavy"})
+    return ents
+end
+
+local function CeilVector(pos)
+    pos.x = math.ceil(pos.x)
+    pos.y = math.ceil(pos.y)
+    pos.z = math.ceil(pos.z)
+    return pos
+end
+
+local function MarblePeriodicTask(inst, tab)
+    local dist = GetDist(inst, tab.pos)
     if dist < 64 then
-        local marble = GetMarble(pos)
+        local marble = GetMarble(tab.pos, tab.prefab)
         if not marble then
-            MarbleTasks[pos]:Cancel()
-            local ceilVector = pos
-            local index = TableContains(ceilVector)
-            table.remove(Marbles, index)
-            SaveMarbles()
+            MarbleTasks[tab.pos]:Cancel()
+            MarbleTasks[tab.pos] = nil
+            local index = TableContains(tab.pos, tab.prefab)
+            if index then
+                table.remove(Marbles, index)
+                SaveMarbles()
+                local marbles = FindMarbles(ThePlayer:GetPosition())
+                for i = 1, #marbles do
+                    BossCalendar:SculpturePostInit(marbles[i])
+                end
+            end
         end
     end
 end
 
 function BossCalendar:SculpturePostInit(inst)
     if inst and inst:IsValid() then
-        local pos = inst:GetPosition()
+        local pos = CeilVector(inst:GetPosition())
 
-        if not TableContains(pos) then
-            Marbles[#Marbles + 1] =
+        if not TableContains(pos, inst.prefab) then
+            local tabIndex = #Marbles + 1
+            Marbles[tabIndex] =
             {
+                prefab = inst.prefab,
                 pos = pos,
                 tex = inst.prefab .. ".tex",
             }
             SaveMarbles()
-            local pos = inst:GetPosition()
-            MarbleTasks[pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, pos)
+            MarbleTasks[pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[tabIndex])
         end
     end
 end
@@ -345,7 +366,9 @@ end
 
 local function StartMarbleTasks()
     for i = 1, #Marbles do
-        MarbleTasks[Marbles[i].pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[i].pos)
+        if not MarbleTasks[Marbles[i].pos] then
+            MarbleTasks[Marbles[i].pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[i])
+        end
     end
 end
 
