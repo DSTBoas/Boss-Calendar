@@ -273,13 +273,6 @@ local function FindMarbles(pos)
     return ents
 end
 
-local function CeilVector(pos)
-    pos.x = math.ceil(pos.x)
-    pos.y = math.ceil(pos.y)
-    pos.z = math.ceil(pos.z)
-    return pos
-end
-
 local function MarblePeriodicTask(inst, tab)
     local dist = GetDist(inst, tab.pos)
     if dist < 64 then
