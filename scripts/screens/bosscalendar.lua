@@ -236,6 +236,7 @@ local function SaveMarbles()
     for i = 1, #Marbles do
         marbles[i] =
         {
+            prefab = Marbles[i].prefab,
             tex = Marbles[i].tex,
             pos = Vector3(Marbles[i].pos.x, Marbles[i].pos.y, Marbles[i].pos.z),
         }
@@ -265,14 +266,14 @@ local function GetMarble(pos, prefab)
     return ents[1] and ents[1].prefab and ents[1].prefab == prefab
 end
 
-local MarbleTasks = {}
-
 local function FindMarbles(pos)
     local x, y, z = pos:Get()
     local ents = TheSim:FindEntities(x, y, z, 100, 0, 0, {"irreplaceable", "nonpotatable", "heavy"})
 
     return ents
 end
+
+local MarbleTasks = {}
 
 local function MarblePeriodicTask(inst, tab)
     local dist = GetDist(inst, tab.pos)
@@ -350,6 +351,7 @@ end
 
 function BossCalendar:LoadIgloos()
     DataContainer:Load()
+
     local camps = DataContainer:GetValue(tostring("igloos_"..TheWorld.meta.seed))
     if camps then
         for i = 1, #camps do
@@ -368,11 +370,13 @@ end
 
 function BossCalendar:LoadMarbles()
     DataContainer:Load()
+
     local marbles = DataContainer:GetValue(tostring("marbles_"..TheWorld.meta.seed))
     if marbles then
         for i = 1, #marbles do
             Marbles[i] =
             {
+                prefab = marbles[i].prefab,
                 tex = marbles[i].tex,
                 pos = Vector3(marbles[i].pos.x, marbles[i].pos.y, marbles[i].pos.z)
             }
