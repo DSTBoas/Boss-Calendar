@@ -308,7 +308,9 @@ function BossCalendar:SculpturePostInit(inst)
                 tex = inst.prefab .. ".tex",
             }
             SaveMarbles()
-            MarbleTasks[pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[tabIndex])
+            if ThePlayer then
+                MarbleTasks[pos] = ThePlayer:DoPeriodicTask(2, MarblePeriodicTask, nil, Marbles[tabIndex])
+            end
         end
     end
 end
