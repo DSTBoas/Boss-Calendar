@@ -40,7 +40,8 @@ for _, prefab in pairs
     "malbatross_beak",
     "skeletonhat",
     "singingshell_octave5"
-} do
+}
+do
     AddPrefabPostInit(prefab, function(inst)
         inst:DoTaskInTime(0, function()
             BossCalendar:ValidateDeath(inst)
