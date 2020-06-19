@@ -55,7 +55,8 @@ if GetModConfigData("MARBLE_ICON") then
         "sculpture_rooknose",
         "sculpture_knighthead",
         "sculpture_bishophead",
-    } do
+    }
+    do
         AddPrefabPostInit(prefab, function(inst)
             inst:DoTaskInTime(0, function()
                 BossCalendar:SculpturePostInit(inst)
