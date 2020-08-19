@@ -483,7 +483,7 @@ local function GetClosestCamp(pos)
     local closest, closeness
 
     for i = 1, #WalrusCamps do
-        if not BossCalendar.trackers[GetTableName(i)].timer then
+        if not (BossCalendar.trackers[GetTableName(i)] and BossCalendar.trackers[GetTableName(i)].timer) then
             if closeness == nil or pos:Dist(WalrusCamps[i]) < closeness then
                 closest = i
                 closeness = pos:Dist(WalrusCamps[i])
@@ -524,7 +524,7 @@ function BossCalendar:AddKill(npc)
 end
 
 function BossCalendar:KilledMonster(npc, inst)
-    if not self.init then
+    if not self.init or not inst then
         return
     end
 
