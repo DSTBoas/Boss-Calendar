@@ -1,10 +1,14 @@
-local GLOBAL = GLOBAL
+_G = GLOBAL
+
+if _G.GetGameModeProperty("level_type") ~= _G.LEVELTYPE.SURVIVAL then
+    return
+end
 
 -- GLOBAL
-local rawget = GLOBAL.rawget
+local rawget = _G.rawget
 
 -- Require
-local BossCalendar = GLOBAL.require("screens/bosscalendar")
+local BossCalendar = _G.require("screens/bosscalendar")
 
 Assets =
 {
@@ -66,13 +70,13 @@ if GetModConfigData("MARBLE_ICON") then
 end
 
 local function GetConfigByte(config)
-    return rawget(GLOBAL, GetModConfigData(config))
+    return rawget(_G, GetModConfigData(config))
 end
 
 if GetConfigByte("OPEN_KEY") then
     local OPEN_KEY = GetConfigByte("OPEN_KEY")
     local TOGGLE_MODE = GetModConfigData("TOGGLE_MODE")
-    local TheInput = GLOBAL.TheInput
+    local TheInput = _G.TheInput
 
     local function getActiveScreenName()
         local activeScreen = TheFrontEnd:GetActiveScreen()
