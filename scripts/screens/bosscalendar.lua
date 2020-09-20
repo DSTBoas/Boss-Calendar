@@ -146,6 +146,10 @@ function BossCalendar:Say(message, time)
 end
 
 local function OnTimerDone(inst, data)
+    if not type(data) == "table" or not data.name or not BossCalendar.trackers[data.name] then
+        return
+    end
+
     local npc = data.name
     BossCalendar.trackers[npc].timer = nil
     BossCalendar:Save()
