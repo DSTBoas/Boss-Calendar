@@ -9,12 +9,14 @@ local Announcer = require("bosscalendar_announcer")()
 local BossCalendar = Class(Screen)
 local DataContainer = PersistentData("BossCalendar")
 local WalrusCamps, Marbles, Settings, NpcImages = {}, {}, {}, {}
+
 local RespawnDurations =
 {
     toadstool_dark = TUNING.TOADSTOOL_RESPAWN_TIME,
     stalker_atrium = TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_TIME,
     malbatross = 7200
 }
+
 local DeathAnimations =
 {
     yellowgem =
@@ -62,6 +64,7 @@ local DeathAnimations =
         death_anim = {"death2"}
     }
 }
+
 local Npcs = 
 {   
     "Dragonfly", "Bee Queen", "Toadstool", "Malbatross",
@@ -71,6 +74,7 @@ local Npcs =
     -- Winterfeast
     "Klaus"
 }
+
 local Talker = require "components/talker"
 local Sayfn = Talker.Say
 local Session
@@ -134,6 +138,7 @@ function BossCalendar:Say(message, time)
     if self.talking then
         return
     end
+
     self.talking = true
     ThePlayer.components.talker.lineduration = time
     ThePlayer.components.talker:Say(message, time, 0, true, false, Settings.REMINDER_COLOR)
@@ -450,14 +455,33 @@ end
 --- General
 ---
 
+local SearchCoolDown = {}
+
+local function IsInCoolDown(inst)
+    if SearchCoolDown[inst.prefab] then
+        return true
+    end
+
+    SearchCoolDown[inst.prefab] = ThePlayer:DoTaskInTime(3, function()
+        SearchCoolDown[inst.prefab] = nil
+    end)
+
+    return false
+end
+
 local function GetNpc(inst)
-    local x, y, z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus", "crabking"})
-    return ents[1]
+    if not IsInCoolDown(inst) then
+        local x, y, z = inst.Transform:GetWorldPosition()
+        local ents = TheSim:FindEntities(x, y, z, 5, 0, 0, {"epic", "walrus", "crabking"})
+        return ents[1]
+    end
+
+    return nil
 end
 
 function BossCalendar:ValidateDeath(inst)
     local npc = GetNpc(inst)
+
     if npc and npc:IsValid() then
         for i = 1, #DeathAnimations[inst.prefab].death_anim do
             if npc.AnimState:IsCurrentAnimation(DeathAnimations[inst.prefab].death_anim[i]) then

@@ -1,4 +1,4 @@
-_G = GLOBAL
+local _G = GLOBAL
 
 if _G.GetGameModeProperty("level_type") ~= _G.LEVELTYPE.SURVIVAL then
     return
@@ -48,7 +48,9 @@ for _, prefab in pairs
 do
     AddPrefabPostInit(prefab, function(inst)
         inst:DoTaskInTime(0, function()
-            BossCalendar:ValidateDeath(inst)
+            if inst.entity and not inst.entity:GetParent() then
+                BossCalendar:ValidateDeath(inst)
+            end
         end)
     end)
 end
