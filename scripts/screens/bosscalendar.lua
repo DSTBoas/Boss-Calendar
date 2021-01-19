@@ -458,6 +458,10 @@ end
 local SearchCoolDown = {}
 
 local function IsInCoolDown(inst)
+    if not ThePlayer then
+        return
+    end
+
     if SearchCoolDown[inst.prefab] then
         return true
     end
