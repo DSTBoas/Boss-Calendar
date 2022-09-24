@@ -182,6 +182,10 @@ function BossCalendar:AddMapIcons(widget)
     end
 end
 
+local function GetWorldIdentifier()
+    return TheWorld.meta.session_identifier
+end
+
 local function SaveCampPositions()
     local camps = {}
 
@@ -189,7 +193,7 @@ local function SaveCampPositions()
         camps[i] = Vector3(WalrusCamps[i].x, WalrusCamps[i].y, WalrusCamps[i].z)
     end
 
-    DataContainer:SetValue("igloos_"..tostring(TheWorld.meta.seed), camps)
+    DataContainer:SetValue("igloos_"..GetWorldIdentifier(), camps)
     DataContainer:Save()
 end
 
@@ -251,7 +255,7 @@ local function SaveMarbles()
         }
     end
 
-    DataContainer:SetValue("marbles_"..tostring(TheWorld.meta.seed), marbles)
+    DataContainer:SetValue("marbles_"..GetWorldIdentifier(), marbles)
     DataContainer:Save()
 end
 
@@ -363,7 +367,7 @@ end
 function BossCalendar:LoadIgloos()
     DataContainer:Load()
 
-    local camps = DataContainer:GetValue(tostring("igloos_"..TheWorld.meta.seed))
+    local camps = DataContainer:GetValue(tostring("igloos_"..GetWorldIdentifier()))
     if camps then
         for i = 1, #camps do
             WalrusCamps[i] = Vector3(camps[i].x, camps[i].y, camps[i].z)
@@ -382,7 +386,7 @@ end
 function BossCalendar:LoadMarbles()
     DataContainer:Load()
 
-    local marbles = DataContainer:GetValue(tostring("marbles_"..TheWorld.meta.seed))
+    local marbles = DataContainer:GetValue(tostring("marbles_"..GetWorldIdentifier()))
     if marbles then
         for i = 1, #marbles do
             Marbles[i] =

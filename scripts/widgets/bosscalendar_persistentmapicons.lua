@@ -11,24 +11,22 @@ local function WorldPosToScreenPos(x, z)
     return screen_x, screen_y
 end
 
+
 local PersistentMapIcons = Class(Widget, function(self, mapwidget, scale)
     Widget._ctor(self, "PersistentMapIcons")
     self.root = self:AddChild(Widget("root"))
-    self.zoomed_scale = {}
     self.mapicons = {}
-
-    for i = 1, 20 do
-        self.zoomed_scale[i] = scale - Easing.outExpo(i - 1, 0, scale - 0.25, 8)
-    end
 
     local MapWidgetOnUpdate = mapwidget.OnUpdate
     mapwidget.OnUpdate = function(mapwidget, ...)
         MapWidgetOnUpdate(mapwidget, ...)
-        local scale = self.zoomed_scale[TheWorld.minimap.MiniMap:GetZoom()]
+        local zoomLevel = TheWorld.minimap.MiniMap:GetZoom()
+
         for _, mapicon in ipairs(self.mapicons) do
             local x, y = WorldPosToScreenPos(mapicon.pos.x, mapicon.pos.z)
             mapicon.icon:SetPosition(x, y)
-            mapicon.icon:SetScale(scale)
+            -- Inefficient but will do for now
+            mapicon.icon:SetScale(Easing.outExpo(zoomLevel - 1, 0, .8 - 0.25, 8))
         end
     end
 end)
